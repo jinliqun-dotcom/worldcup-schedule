@@ -516,6 +516,22 @@ function venueName(city) {
   return city;
 }
 
+// 直播/回放链接
+function getStreamUrl(m) {
+  // Custom URL per match
+  if (m.streamUrl) return m.streamUrl;
+  // Default: CCTV5 live (main World Cup broadcaster in China)
+  const homeZh = TEAM_NAMES[m.home] || m.home;
+  const awayZh = TEAM_NAMES[m.away] || m.away;
+  return `https://tv.cctv.com/live/cctv5/`;
+}
+function getReplayUrl(m) {
+  if (m.replayUrl) return m.replayUrl;
+  const homeZh = TEAM_NAMES[m.home] || m.home;
+  const awayZh = TEAM_NAMES[m.away] || m.away;
+  return `https://search.cctv.com/search.php?qtext=${encodeURIComponent('世界杯 ' + homeZh + ' ' + awayZh)}&type=video`;
+}
+
 // 竞彩销售时间规则
 function getBettingWindow(matchDateBJ) {
   // matchDateBJ: Date object in Beijing time
@@ -812,7 +828,7 @@ function render() {
         infoHtml = `<div class="info">
           <span class="group">${m.group ? 'G' + m.group : m._stage}</span>
           <div class="time" style="color:var(--text-dim)">${fmtTime(m.date)}</div>
-          <div class="venue">已结束</div>
+          <div class="venue">已结束 · <a href="${getReplayUrl(m)}" target="_blank" rel="noopener" style="color:var(--accent2);text-decoration:none;">🎬 回放</a></div>
         </div>`;
       } else {
         infoHtml = `<div class="info">
@@ -841,6 +857,7 @@ function render() {
       if (m.home !== 'TBD' && !done) {
         html += `
         <div style="grid-column:1/-1;padding:6px 18px 10px;font-size:19px;display:flex;gap:20px;flex-wrap:wrap;color:var(--text-dim);border-bottom:1px solid var(--border);margin-bottom:4px;">
+          <span>📺 <a href="${getStreamUrl(m)}" target="_blank" rel="noopener" style="color:var(--accent2);text-decoration:none;font-weight:600;">看直播</a></span>
           <span>🎲 <span style="color:var(--bet-accent);font-weight:600;">竞彩</span> 投注: <span style="color:var(--text);font-family:monospace;">${betting.open}</span> → <span style="color:var(--text);font-family:monospace;">${betting.deadline}</span> 截止</span>
           <span class="tooltip" data-tip="竞彩销售: 周一至五11:00-22:00 / 周末11:00-23:00">⏰ 销售时段: ${betting.isWeekend ? '周末 11-23时' : '工作日 11-22时'}</span>
           <span class="expand-btn" onclick="toggleOdds('${m.id}')">📊 ${isExpanded ? '收起赔率' : '展开赔率'}</span>
