@@ -1,0 +1,1192 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 世界杯 · 赛程 & 赔率</title>
+<style>
+:root {
+  --bg: #f0f2f5;
+  --card: #ffffff;
+  --card-hover: #e8f0fe;
+  --border: #dde1e6;
+  --text: #1a1a2e;
+  --text-dim: #888899;
+  --accent: #c78a08;
+  --accent2: #0d7a3e;
+  --live: #d32f2f;
+  --upcoming: #1976d2;
+  --done: #9e9e9e;
+  --odd-up: #2e7d32;
+  --odd-down: #c62828;
+  --bet-bg: #fff4e6;
+  --bet-accent: #c77800;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-hover: 0 2px 8px rgba(0,0,0,0.12);
+  --gold: #c78a08;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  min-height: 100vh; line-height: 1.6; font-size: 16px;
+  position: relative;
+  overflow-x: hidden;
+}
+/* World Cup decorative background */
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    /* faint stars */
+    radial-gradient(1.5px 1.5px at 5% 10%, rgba(199,138,8,0.18), transparent),
+    radial-gradient(1px 1px at 15% 25%, rgba(199,138,8,0.12), transparent),
+    radial-gradient(2px 2px at 25% 8%, rgba(199,138,8,0.20), transparent),
+    radial-gradient(1px 1px at 35% 40%, rgba(199,138,8,0.10), transparent),
+    radial-gradient(1.5px 1.5px at 48% 15%, rgba(199,138,8,0.15), transparent),
+    radial-gradient(2px 2px at 55% 35%, rgba(199,138,8,0.12), transparent),
+    radial-gradient(1px 1px at 62% 12%, rgba(199,138,8,0.16), transparent),
+    radial-gradient(1.5px 1.5px at 72% 28%, rgba(199,138,8,0.10), transparent),
+    radial-gradient(2px 2px at 80% 8%, rgba(199,138,8,0.20), transparent),
+    radial-gradient(1px 1px at 88% 32%, rgba(199,138,8,0.13), transparent),
+    radial-gradient(1.5px 1.5px at 92% 18%, rgba(199,138,8,0.15), transparent),
+    radial-gradient(1px 1px at 8% 55%, rgba(199,138,8,0.10), transparent),
+    radial-gradient(2px 2px at 18% 70%, rgba(199,138,8,0.12), transparent),
+    radial-gradient(1.5px 1.5px at 30% 62%, rgba(199,138,8,0.15), transparent),
+    radial-gradient(1px 1px at 42% 78%, rgba(199,138,8,0.10), transparent),
+    radial-gradient(2px 2px at 55% 68%, rgba(199,138,8,0.13), transparent),
+    radial-gradient(1px 1px at 68% 58%, rgba(199,138,8,0.16), transparent),
+    radial-gradient(1.5px 1.5px at 75% 72%, rgba(199,138,8,0.10), transparent),
+    radial-gradient(2px 2px at 85% 55%, rgba(199,138,8,0.12), transparent),
+    radial-gradient(1px 1px at 95% 65%, rgba(199,138,8,0.15), transparent),
+    radial-gradient(1.5px 1.5px at 10% 88%, rgba(199,138,8,0.10), transparent),
+    radial-gradient(1px 1px at 50% 90%, rgba(199,138,8,0.12), transparent),
+    radial-gradient(2px 2px at 78% 88%, rgba(199,138,8,0.10), transparent),
+    radial-gradient(1px 1px at 90% 82%, rgba(199,138,8,0.13), transparent),
+    /* faint pitch stripes */
+    repeating-linear-gradient(90deg, transparent, transparent 98px, rgba(13,122,62,0.02) 98px, rgba(13,122,62,0.02) 100px);
+}
+/* Faint World Cup trophy silhouette — top right */
+body::after {
+  content: ''; position: fixed; top: -60px; right: -80px; z-index: 0; pointer-events: none;
+  width: 500px; height: 500px; opacity: 0.025;
+  background:
+    radial-gradient(ellipse 120px 180px at 250px 200px, #c78a08 0%, transparent 70%),
+    radial-gradient(circle 60px at 250px 110px, #c78a08 0%, transparent 70%),
+    radial-gradient(ellipse 30px 50px at 250px 250px, #c78a08 0%, transparent 70%),
+    radial-gradient(ellipse 90px 15px at 250px 290px, #c78a08 0%, transparent 60%),
+    radial-gradient(ellipse 70px 12px at 250px 310px, #c78a08 0%, transparent 60%),
+    radial-gradient(ellipse 50px 10px at 250px 326px, #c78a08 0%, transparent 60%);
+}
+
+/* Header */
+header {
+  background: linear-gradient(135deg, #1a3a5c 0%, #1e4976 50%, #15304d 100%);
+  border-bottom: 3px solid var(--accent);
+  padding: 16px 24px; position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+.logo { display:flex; align-items:center; gap:14px; }
+.logo-icon { flex-shrink:0; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.25)); }
+.logo h1 { font-size:26px; font-weight:800; color:#ffd54f; letter-spacing:0.8px; font-family: 'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif; }
+.logo span { font-size:14px; color:rgba(255,255,255,0.65); display:block; letter-spacing:0.3px; }
+
+/* Controls */
+.controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.btn {
+  padding: 9px 18px; border-radius: 8px; border:1px solid var(--border);
+  background: #fff; color: var(--text); cursor:pointer;
+  font-size:14px; transition: all 0.25s; white-space:nowrap; font-weight:500;
+}
+.btn:hover { background: var(--card-hover); border-color: var(--accent); }
+.btn.active { background: var(--accent); color: #fff; border-color: var(--accent); font-weight:700; }
+.btn-live { border-color: var(--live); color: var(--live); }
+.btn-live.active { background: var(--live); color: #fff; }
+.odds-key-btn { background: var(--bet-bg); border-color: var(--bet-accent); color: var(--bet-accent); }
+
+/* Odds API key modal */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; justify-content:center; align-items:center; }
+.modal-overlay.show { display:flex; }
+.modal {
+  background: #fff; border:1px solid var(--border); border-radius:14px;
+  padding:28px; max-width:460px; width:92%; box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+}
+.modal h3 { margin-bottom:14px; color: #1a3a5c; font-size:19px; }
+.modal input { width:100%; padding:14px; border-radius:8px; border:1px solid var(--border); background: #fff; color:var(--text); font-size:15px; margin:10px 0; }
+.modal .note { font-size:13px; color:var(--text-dim); margin:8px 0; }
+.modal .note a { color: var(--accent2); }
+.modal .btn { width:auto; display:inline-block; }
+
+/* Tabs */
+.tabs {
+  display:flex; gap:0; border-bottom:1px solid var(--border);
+  padding:0 24px; background: #fff; overflow-x:auto; position:relative; z-index:1;
+}
+.tab {
+  padding: 14px 24px; font-size:15px; cursor:pointer; border:none; background:none;
+  color: var(--text-dim); border-bottom:3px solid transparent; transition:all 0.25s;
+  white-space:nowrap; font-weight:500;
+}
+.tab:hover { color: var(--text); border-bottom-color: var(--border); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight:700; }
+.tab .badge { font-size:11px; background:var(--live); color:#fff; padding:2px 8px; border-radius:10px; margin-left:5px; font-weight:700; }
+
+/* Date header */
+.date-header {
+  padding: 20px 24px 10px; font-size:16px; font-weight:700;
+  color: var(--text-dim); letter-spacing:1.5px; display:flex; align-items:center; gap:10px;
+  position: relative; z-index:1; text-transform: uppercase;
+}
+.date-header::after { content:''; flex:1; height:1px; background:var(--border); opacity:0.6; }
+
+/* Match grid */
+.match-grid { padding: 0 24px 24px; display:grid; gap:10px; position: relative; z-index:1; }
+.match-card {
+  background: var(--card); border:1px solid var(--border); border-radius:12px;
+  padding:18px 22px; cursor:pointer; transition: all 0.25s;
+  display:grid; grid-template-columns: 1fr auto 1fr auto; align-items:center; gap:16px;
+  box-shadow: var(--shadow); position: relative; z-index:1;
+}
+.match-card:hover { background: var(--card-hover); border-color: #69b0ff; box-shadow: var(--shadow-hover); transform: translateY(-1px); }
+.match-card.live { border-left: 4px solid var(--live); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{ border-left-color:var(--live); } 50%{ border-left-color:#ff6b6b; } }
+.match-card.done { opacity:0.6; }
+.match-card .team { display:flex; align-items:center; gap:12px; font-weight:700; font-size:19px; }
+.match-card .team:last-child { justify-content:flex-end; text-align:right; flex-direction:row-reverse; }
+.match-card .team .flag { width:40px; height:28px; object-fit:contain; vertical-align:middle; border-radius:3px; flex-shrink:0; box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+.match-card .team .name { white-space:nowrap; letter-spacing:0.5px; }
+.match-card .score { font-size:30px; font-weight:800; min-width:80px; text-align:center; letter-spacing:5px; color:var(--text); }
+.match-card .score .live-dot { display:inline-block; width:10px; height:10px; background:var(--live); border-radius:50%; margin-right:6px; animation:blink 1s infinite; vertical-align:middle; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+.match-card .score .minute { font-size:11px; color:var(--live); display:block; letter-spacing:0; margin-top:2px; }
+.match-card .info { text-align:center; font-size:13px; color:var(--text-dim); min-width:100px; }
+.match-card .info .time { font-size:22px; font-weight:700; color:var(--text); }
+.match-card .info .venue { font-size:12px; margin-top:3px; opacity:0.7; }
+.match-card .info .countdown { font-size:15px; color:var(--accent); margin-top:5px; font-weight:700; }
+.match-card .info .group { font-size:11px; background:#e8ecf0; padding:3px 10px; border-radius:4px; font-weight:600; }
+.match-card.expanded { grid-template-columns:1fr; }
+
+/* Betting row */
+.bet-info {
+  display:flex; gap:18px; font-size:13px; color:var(--text-dim); flex-wrap:wrap; align-items:center;
+}
+.bet-info .label { color:var(--bet-accent); font-weight:700; }
+.bet-info .time-val { color:var(--text); font-family:monospace; }
+
+/* Odds row inside expanded card */
+.odds-table { width:100%; border-collapse:collapse; font-size:14px; margin-top:10px; }
+.odds-table th { text-align:left; color:var(--text-dim); font-weight:500; padding:6px 10px; border-bottom:1px solid var(--border); }
+.odds-table td { padding:8px 10px; border-bottom:1px solid var(--border); }
+.odds-table .odd-val { font-weight:700; font-family:monospace; text-align:center; }
+.odds-table .best-odd { color: var(--odd-up); }
+
+/* Expand button */
+.expand-btn { font-size:15px; color: var(--accent2); cursor:pointer; margin-top:8px; display:inline-block; font-weight:600; }
+
+/* Search */
+.search-wrap { position:relative; }
+.search-wrap input {
+  padding:9px 16px 9px 36px; border-radius:24px; border:1px solid var(--border);
+  background: #fff; color: var(--text); font-size:14px; width:220px; outline:none;
+  transition: all 0.25s;
+}
+.search-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(199,138,8,0.1); }
+.search-wrap input::placeholder { color: var(--text-dim); }
+.search-wrap .s-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:14px; color:var(--text-dim); }
+
+/* Footer */
+footer {
+  text-align:center; padding:32px; color:#999; font-size:13px;
+  border-top:1px solid var(--border); margin-top:24px; background:#fff; position:relative; z-index:1;
+}
+
+/* Loading */
+.loading { text-align:center; padding:40px; color:var(--text-dim); }
+.spinner { display:inline-block; width:22px; height:22px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; margin-right:10px; vertical-align:middle; }
+@keyframes spin { to{transform:rotate(360deg);} }
+
+/* Tooltip */
+.tooltip { position:relative; }
+.tooltip::after {
+  content:attr(data-tip); position:absolute; bottom:100%; left:50%; transform:translateX(-50%);
+  background:#333; color:#fff; padding:5px 10px; border-radius:6px; font-size:11px;
+  white-space:nowrap; opacity:0; pointer-events:none; transition:opacity 0.2s;
+}
+.tooltip:hover::after { opacity:1; }
+
+/* No data */
+.no-data { text-align:center; padding:48px; color:var(--text-dim); font-size:17px; }
+
+/* Live banner */
+.live-banner {
+  background: linear-gradient(90deg, #c62828, #d32f2f);
+  color: #fff; text-align:center; padding:10px; font-size:15px; display:none; font-weight:600;
+  position: relative; z-index:1; letter-spacing:0.5px;
+}
+.live-banner.show { display:block; }
+.live-banner .dot { display:inline-block; width:10px; height:10px; background:#fff; border-radius:50%; margin-right:8px; animation:blink 1s infinite; }
+
+/* ========== RESPONSIVE ========== */
+
+/* Tablet: 768-1023px */
+@media (max-width: 1023px) {
+  header { padding: 12px 18px; }
+  .logo h1 { font-size: 20px; }
+  .logo-icon svg { width: 70px; height: 70px; }
+  .btn { font-size: 13px; padding: 8px 14px; }
+  .tabs { padding: 0 14px; }
+  .tab { padding: 12px 18px; font-size: 14px; }
+  .match-grid { padding: 0 14px 14px; }
+  .match-card { padding: 14px 16px; }
+  .match-card .team { font-size: 17px; gap: 10px; }
+  .match-card .team .flag { width:34px; height:24px; }
+  .match-card .score { font-size: 26px; min-width: 68px; }
+  .date-header { padding: 16px 18px 8px; font-size: 14px; }
+  .search-wrap input { width: 160px; font-size: 13px; }
+}
+
+/* Mobile: < 768px */
+@media (max-width: 767px) {
+  header {
+    padding: 12px 14px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .logo { justify-content: center; }
+  .logo-icon svg { width: 52px; height: 52px; }
+  .logo h1 { font-size: 20px; text-align: center; }
+  .logo span { text-align: center; font-size: 12px; }
+
+  .controls {
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn { font-size: 12px; padding: 9px 14px; border-radius: 8px; }
+  .search-wrap { width: 100%; }
+  .search-wrap input { width: 100%; font-size: 14px; padding: 10px 16px 10px 38px; }
+
+  .tabs {
+    padding: 0 8px;
+    gap: 0;
+  }
+  .tab {
+    padding: 12px 14px;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .date-header {
+    padding: 18px 14px 10px;
+    font-size: 14px;
+  }
+
+  .match-grid {
+    padding: 0 10px 10px;
+    gap: 8px;
+  }
+
+  /* Mobile card: stack layout */
+  .match-card {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 16px 14px;
+    border-radius: 14px;
+  }
+  .match-card .team { font-size: 16px; gap: 10px; }
+  .match-card .team .flag { width:34px; height:24px; }
+  .match-card .score {
+    order: 3;
+    grid-column: 1 / -1;
+    font-size: 28px;
+    letter-spacing: 4px;
+    min-width: auto;
+    padding: 6px 0;
+  }
+  .match-card .info {
+    order: 4;
+    grid-column: 1 / -1;
+    text-align: left;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    min-width: auto;
+  }
+  .match-card .info .time { font-size: 16px; }
+  .match-card .info .countdown { font-size: 13px; margin-top: 0; }
+  .match-card .info .venue { font-size: 12px; }
+
+  /* Betting row on mobile */
+  .match-card + div { font-size: 12px; gap: 8px; padding: 4px 12px 8px !important; }
+
+  /* Odds table scroll on mobile */
+  .odds-table { font-size: 12px; }
+  .odds-table th, .odds-table td { padding: 6px 6px; }
+
+  .modal { padding: 20px; }
+  .modal h3 { font-size: 16px; }
+
+  .no-data { padding: 30px 20px; font-size: 15px; }
+
+  footer { padding: 20px; font-size: 12px; }
+}
+
+/* Small mobile: < 480px */
+@media (max-width: 479px) {
+  .logo h1 { font-size: 17px; }
+  .btn { font-size: 11px; padding: 8px 11px; }
+  .tab { padding: 10px 11px; font-size: 12px; }
+  .match-card { padding: 14px 12px; }
+  .match-card .team { font-size: 15px; }
+  .match-card .team .flag { width:28px; height:20px; }
+  .match-card .score { font-size: 24px; }
+  .odds-table { font-size: 11px; }
+  .odds-table th, .odds-table td { padding: 5px 4px; }
+}
+</style>
+</head>
+<body>
+
+<div class="live-banner" id="liveBanner"><span class="dot"></span>比赛进行中 · 数据每30秒自动刷新</div>
+
+<header>
+  <div class="logo">
+    <span class="logo-icon"><svg viewBox="0 0 64 64" width="120" height="120"><defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffd54f"/><stop offset="50%" stop-color="#f5c842"/><stop offset="100%" stop-color="#c78a08"/></linearGradient><linearGradient id="tgd" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f5c842"/><stop offset="100%" stop-color="#b8860b"/></linearGradient></defs><!-- cup --><path d="M14 8 L14 28 C14 38 28 44 32 44 C36 44 50 38 50 28 L50 8 Z" fill="url(#tg)"/><!-- handles --><path d="M14 12 C6 12 4 20 4 26 C4 30 6 34 14 32" fill="none" stroke="url(#tgd)" stroke-width="3" stroke-linecap="round"/><path d="M50 12 C58 12 60 20 60 26 C60 30 58 34 50 32" fill="none" stroke="url(#tgd)" stroke-width="3" stroke-linecap="round"/><!-- base --><rect x="20" y="44" width="24" height="6" rx="2" fill="url(#tgd)"/><rect x="24" y="50" width="16" height="4" rx="1" fill="url(#tgd)"/><rect x="26" y="54" width="12" height="3" rx="1" fill="url(#tgd)"/><!-- top sphere --><circle cx="32" cy="8" r="6" fill="url(#tgd)"/><!-- star --><polygon points="32,4 34,7 38,7 35,9 36,12 32,10 28,12 29,9 26,7 30,7" fill="#fff" opacity="0.9"/></svg></span>
+    <div>
+      <h1>2026 世界杯赛程</h1>
+      <span>FIFA World Cup · USA / Canada / Mexico</span>
+    </div>
+  </div>
+  <div class="controls">
+    <div class="search-wrap">
+      <span class="s-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="搜索球队..." oninput="filterMatches()">
+    </div>
+    <button class="btn odds-key-btn" onclick="showApiKeyModal()" title="设置 The Odds API Key 获取实时赔率">🔑 赔率API</button>
+    <button class="btn" id="btnAll" onclick="switchTab('all')">全部赛程</button>
+    <button class="btn" id="btnToday" onclick="switchTab('today')">📅 今日</button>
+    <button class="btn btn-live" id="btnLive" onclick="switchTab('live')">🔴 进行中</button>
+    <button class="btn" id="btnUpcoming" onclick="switchTab('upcoming')">⏳ 即将开始</button>
+    <button class="btn" id="debugToggle" onclick="toggleDebug()" style="background:#222;color:#0f0;border-color:#444;font-family:monospace;font-size:12px;">🐛 调试</button>
+  </div>
+</header>
+
+<div class="tabs" id="stageTabs">
+  <button class="tab active" onclick="switchStage('group')">小组赛</button>
+  <button class="tab" onclick="switchStage('r32')">1/16决赛</button>
+  <button class="tab" onclick="switchStage('r16')">1/8决赛</button>
+  <button class="tab" onclick="switchStage('qf')">1/4决赛</button>
+  <button class="tab" onclick="switchStage('sf')">半决赛</button>
+  <button class="tab" onclick="switchStage('final')">决赛</button>
+</div>
+
+<div id="content"></div>
+
+<div class="modal-overlay" id="apiKeyModal">
+  <div class="modal">
+    <h3>⚡ 设置实时赔率 API</h3>
+    <p style="font-size:13px;color:var(--text-dim);">输入 <a href="https://the-odds-api.com/" target="_blank" style="color:var(--accent2)">The Odds API</a> 密钥获取 Bet365、Pinnacle 等博彩公司实时赔率。</p>
+    <input type="text" id="apiKeyInput" placeholder="粘贴 API Key...">
+    <p class="note">免费 tier: 500请求/月 · <a href="https://the-odds-api.com/#get-access" target="_blank">获取免费 Key →</a></p>
+    <div style="display:flex;gap:10px;margin-top:12px;">
+      <button class="btn active" onclick="saveApiKey()">💾 保存</button>
+      <button class="btn" onclick="clearApiKey()">🗑️ 清除</button>
+      <button class="btn" onclick="closeApiKeyModal()">取消</button>
+    </div>
+    <p id="apiStatus" style="font-size:12px;margin-top:8px;color:var(--odd-up);"></p>
+  </div>
+</div>
+
+<footer>
+  <p style="font-size:12px;color:#f0ad4e;font-weight:700;">✅ v5 · 2026-06-13 16:54 UTC+8</p>
+  <p>⚽ 2026 FIFA World Cup · 48支球队 · 104场比赛 · 美加墨联合主办</p>
+  <p style="margin-top:4px;">竞彩数据仅供参考 · 请理性购彩 · 未成年人不得购彩</p>
+</footer>
+
+<!-- DEBUG PANEL -->
+<div id="debugPanel" style="display:none;position:fixed;bottom:0;left:0;right:0;max-height:40vh;overflow-y:auto;background:#1a1a2e;color:#0f0;font-family:Consolas,monospace;font-size:12px;padding:12px 20px;border-top:2px solid #0f0;z-index:300;line-height:1.8;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+    <span style="color:#ff0;font-weight:bold;">🐛 赔率 API 调试面板</span>
+    <button onclick="clearDebug()" style="background:#333;color:#0f0;border:1px solid #555;padding:2px 10px;cursor:pointer;border-radius:4px;font-size:11px;">清空</button>
+  </div>
+  <div id="debugContent" style="color:var(--text-dim)">展开赔率时显示 API 请求详情</div>
+</div>
+
+<script>
+// ===================== DATA =====================
+
+const GROUPS = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+
+const COUNTRY_CODES = {
+  MEX:'mx',RSA:'za',KOR:'kr',CZE:'cz',CAN:'ca',BIH:'ba',QAT:'qa',SUI:'ch',
+  BRA:'br',MAR:'ma',HAI:'ht',SCO:'gb-sct',USA:'us',PAR:'py',AUS:'au',TUR:'tr',
+  GER:'de',CUW:'cw',CIV:'ci',ECU:'ec',NED:'nl',JPN:'jp',SWE:'se',TUN:'tn',
+  BEL:'be',EGY:'eg',IRN:'ir',NZL:'nz',ESP:'es',CPV:'cv',KSA:'sa',URU:'uy',
+  FRA:'fr',SEN:'sn',IRQ:'iq',NOR:'no',ARG:'ar',ALG:'dz',AUT:'at',JOR:'jo',
+  POR:'pt',COD:'cd',UZB:'uz',COL:'co',ENG:'gb-eng',CRO:'hr',GHA:'gh',PAN:'pa'
+};
+
+const TEAM_NAMES = {
+  MEX:'墨西哥',RSA:'南非',KOR:'韩国',CZE:'捷克',CAN:'加拿大',BIH:'波黑',QAT:'卡塔尔',SUI:'瑞士',
+  BRA:'巴西',MAR:'摩洛哥',HAI:'海地',SCO:'苏格兰',USA:'美国',PAR:'巴拉圭',AUS:'澳大利亚',TUR:'土耳其',
+  GER:'德国',CUW:'库拉索',CIV:'科特迪瓦',ECU:'厄瓜多尔',NED:'荷兰',JPN:'日本',SWE:'瑞典',TUN:'突尼斯',
+  BEL:'比利时',EGY:'埃及',IRN:'伊朗',NZL:'新西兰',ESP:'西班牙',CPV:'佛得角',KSA:'沙特阿拉伯',URU:'乌拉圭',
+  FRA:'法国',SEN:'塞内加尔',IRQ:'伊拉克',NOR:'挪威',ARG:'阿根廷',ALG:'阿尔及利亚',AUT:'奥地利',JOR:'约旦',
+  POR:'葡萄牙',COD:'民主刚果',UZB:'乌兹别克斯坦',COL:'哥伦比亚',ENG:'英格兰',CRO:'克罗地亚',GHA:'加纳',PAN:'巴拿马'
+};
+
+// Team aliases for API matching - covers The Odds API naming variations
+const TEAM_ALIASES = {
+  MEX: ['mexico'],
+  RSA: ['south africa'],
+  KOR: ['south korea', 'korea republic', 'korea'],
+  CZE: ['czech republic', 'czechia'],
+  CAN: ['canada'],
+  BIH: ['bosnia', 'bosnia and herzegovina', 'bosnia-herzegovina', 'bosnia & herzegovina'],
+  QAT: ['qatar'],
+  SUI: ['switzerland'],
+  BRA: ['brazil'],
+  MAR: ['morocco'],
+  HAI: ['haiti'],
+  SCO: ['scotland'],
+  USA: ['usa', 'united states', 'united states of america'],
+  PAR: ['paraguay'],
+  AUS: ['australia'],
+  TUR: ['turkey', 'turkiye', 'türkiye'],
+  GER: ['germany'],
+  CUW: ['curacao', 'curaçao'],
+  CIV: ['ivory coast', "cote d'ivoire", "côte d'ivoire"],
+  ECU: ['ecuador'],
+  NED: ['netherlands', 'holland'],
+  JPN: ['japan'],
+  SWE: ['sweden'],
+  TUN: ['tunisia'],
+  BEL: ['belgium'],
+  EGY: ['egypt'],
+  IRN: ['iran', 'iran islamic republic', 'islamic republic of iran'],
+  NZL: ['new zealand'],
+  ESP: ['spain'],
+  CPV: ['cape verde', 'cabo verde'],
+  KSA: ['saudi arabia'],
+  URU: ['uruguay'],
+  FRA: ['france'],
+  SEN: ['senegal'],
+  IRQ: ['iraq'],
+  NOR: ['norway'],
+  ARG: ['argentina'],
+  ALG: ['algeria'],
+  AUT: ['austria'],
+  JOR: ['jordan'],
+  POR: ['portugal'],
+  COD: ['dr congo', 'democratic republic of congo', 'democratic republic of the congo', 'congo dr', 'congo'],
+  UZB: ['uzbekistan'],
+  COL: ['colombia'],
+  ENG: ['england'],
+  CRO: ['croatia'],
+  GHA: ['ghana'],
+  PAN: ['panama']
+};
+
+const VENUES = {
+  'Mexico City':'墨西哥城 · 阿兹特克体育场',
+  'Guadalajara':'瓜达拉哈拉 · 阿克伦体育场',
+  'Toronto':'多伦多 · BMO体育场',
+  'Los Angeles':'洛杉矶 · SoFi体育场',
+  'San Francisco':'旧金山湾区 · 李维斯体育场',
+  'New York':'纽约/新泽西 · 大都会人寿体育场',
+  'Boston':'波士顿 · 吉列体育场',
+  'Vancouver':'温哥华 · BC Place',
+  'Houston':'休斯顿 · NRG体育场',
+  'Dallas':'达拉斯 · AT&T体育场',
+  'Philadelphia':'费城 · 林肯金融体育场',
+  'Monterrey':'蒙特雷 · BBVA体育场',
+  'Atlanta':'亚特兰大 · 梅赛德斯-奔驰体育场',
+  'Seattle':'西雅图 · 流明体育场',
+  'Miami':'迈阿密 · 硬石体育场',
+  'Kansas City':'堪萨斯城 · 箭头体育场'
+};
+
+function venueName(city) {
+  for (let k of Object.keys(VENUES)) {
+    if (city.toLowerCase().includes(k.toLowerCase())) return VENUES[k];
+  }
+  return city;
+}
+
+// 竞彩销售时间规则
+function getBettingWindow(matchDateBJ) {
+  // matchDateBJ: Date object in Beijing time
+  const day = matchDateBJ.getDay(); // 0=Sun, 6=Sat
+  const isWeekend = (day === 0 || day === 6);
+  const openHour = 11; // 每天11:00开售
+  const closeHour = isWeekend ? 23 : 22; // 周末到23:00，工作日到22:00
+
+  // 竞彩通常赛前1-3天开售，这里假设赛前48小时可投注
+  // 截止时间：比赛开始前10分钟
+  const kickoff = new Date(matchDateBJ);
+  const deadline = new Date(kickoff.getTime() - 10 * 60 * 1000);
+  const openDate = new Date(kickoff.getTime() - 48 * 60 * 60 * 1000);
+
+  const fmt = d => {
+    const m = (d.getMonth()+1).toString().padStart(2,'0');
+    const day = d.getDate().toString().padStart(2,'0');
+    const h = d.getHours().toString().padStart(2,'0');
+    const min = d.getMinutes().toString().padStart(2,'0');
+    return `${m}/${day} ${h}:${min}`;
+  };
+
+  return { open: fmt(openDate), deadline: fmt(deadline), isWeekend };
+}
+
+// ===================== MATCH DATA =====================
+// 比赛时间均为北京时间(UTC+8)
+// status: 'done' | 'live' | 'upcoming'
+// score: {home:null, away:null} for upcoming, {home:N, away:N} for done/live
+
+const RAW_MATCHES = [
+  // === GROUP STAGE MATCHDAY 1 ===
+  // Jun 11 (Thu) - COMPLETED
+  {id:'A1', group:'A', home:'MEX', away:'RSA', dateBJ:'2026-06-11T03:00:00+08:00', venue:'Mexico City Stadium, Mexico City', status:'done', score:{home:2,away:0}},
+  // Jun 12 (Fri) - COMPLETED
+  {id:'A2', group:'A', home:'KOR', away:'CZE', dateBJ:'2026-06-12T10:00:00+08:00', venue:'Guadalajara Stadium, Guadalajara', status:'done', score:{home:2,away:1}},
+  // Jun 13 (Sat) - TODAY
+  {id:'B1', group:'B', home:'CAN', away:'BIH', dateBJ:'2026-06-13T03:00:00+08:00', venue:'Toronto Stadium, Toronto', status:'upcoming', score:{home:null,away:null}},
+  {id:'D1', group:'D', home:'USA', away:'PAR', dateBJ:'2026-06-13T09:00:00+08:00', venue:'Los Angeles Stadium, Los Angeles', status:'upcoming', score:{home:null,away:null}},
+  // Jun 14 (Sun)
+  {id:'B2', group:'B', home:'QAT', away:'SUI', dateBJ:'2026-06-14T03:00:00+08:00', venue:'San Francisco Bay Area Stadium, San Francisco Bay Area', status:'upcoming', score:{home:null,away:null}},
+  {id:'C1', group:'C', home:'BRA', away:'MAR', dateBJ:'2026-06-14T06:00:00+08:00', venue:'New York New Jersey Stadium, New York/New Jersey', status:'upcoming', score:{home:null,away:null}},
+  {id:'C2', group:'C', home:'HAI', away:'SCO', dateBJ:'2026-06-14T09:00:00+08:00', venue:'Boston Stadium, Boston', status:'upcoming', score:{home:null,away:null}},
+  {id:'D2', group:'D', home:'AUS', away:'TUR', dateBJ:'2026-06-14T12:00:00+08:00', venue:'BC Place Vancouver, Vancouver', status:'upcoming', score:{home:null,away:null}},
+  // Jun 15 (Mon)
+  {id:'E1', group:'E', home:'GER', away:'CUW', dateBJ:'2026-06-15T01:00:00+08:00', venue:'Houston Stadium, Houston', status:'upcoming', score:{home:null,away:null}},
+  {id:'F1', group:'F', home:'NED', away:'JPN', dateBJ:'2026-06-15T04:00:00+08:00', venue:'Dallas Stadium, Dallas', status:'upcoming', score:{home:null,away:null}},
+  {id:'E2', group:'E', home:'CIV', away:'ECU', dateBJ:'2026-06-15T07:00:00+08:00', venue:'Philadelphia Stadium, Philadelphia', status:'upcoming', score:{home:null,away:null}},
+  {id:'F2', group:'F', home:'SWE', away:'TUN', dateBJ:'2026-06-15T10:00:00+08:00', venue:'Monterrey Stadium, Monterrey', status:'upcoming', score:{home:null,away:null}},
+  // Jun 16 (Tue)
+  {id:'H1', group:'H', home:'ESP', away:'CPV', dateBJ:'2026-06-16T00:00:00+08:00', venue:'Atlanta Stadium, Atlanta', status:'upcoming', score:{home:null,away:null}},
+  {id:'G1', group:'G', home:'BEL', away:'EGY', dateBJ:'2026-06-16T03:00:00+08:00', venue:'Seattle Stadium, Seattle', status:'upcoming', score:{home:null,away:null}},
+  {id:'H2', group:'H', home:'KSA', away:'URU', dateBJ:'2026-06-16T06:00:00+08:00', venue:'Miami Stadium, Miami', status:'upcoming', score:{home:null,away:null}},
+  {id:'G2', group:'G', home:'IRN', away:'NZL', dateBJ:'2026-06-16T09:00:00+08:00', venue:'Los Angeles Stadium, Los Angeles', status:'upcoming', score:{home:null,away:null}},
+  {id:'I1', group:'I', home:'FRA', away:'SEN', dateBJ:'2026-06-17T03:00:00+08:00', venue:'New York New Jersey Stadium, New York/New Jersey', status:'upcoming', score:{home:null,away:null}},
+  {id:'I2', group:'I', home:'IRQ', away:'NOR', dateBJ:'2026-06-17T06:00:00+08:00', venue:'Boston Stadium, Boston', status:'upcoming', score:{home:null,away:null}},
+  // Jun 17 (Wed)
+  {id:'J1', group:'J', home:'ARG', away:'ALG', dateBJ:'2026-06-17T09:00:00+08:00', venue:'Kansas City Stadium, Kansas City', status:'upcoming', score:{home:null,away:null}},
+  {id:'J2', group:'J', home:'AUT', away:'JOR', dateBJ:'2026-06-17T12:00:00+08:00', venue:'San Francisco Bay Area Stadium, San Francisco Bay Area', status:'upcoming', score:{home:null,away:null}},
+  {id:'K1', group:'K', home:'POR', away:'COD', dateBJ:'2026-06-18T01:00:00+08:00', venue:'Houston Stadium, Houston', status:'upcoming', score:{home:null,away:null}},
+  {id:'L1', group:'L', home:'ENG', away:'CRO', dateBJ:'2026-06-18T04:00:00+08:00', venue:'Dallas Stadium, Dallas', status:'upcoming', score:{home:null,away:null}},
+  {id:'L2', group:'L', home:'GHA', away:'PAN', dateBJ:'2026-06-18T07:00:00+08:00', venue:'Toronto Stadium, Toronto', status:'upcoming', score:{home:null,away:null}},
+  // Jun 18 (Thu)
+  {id:'K2', group:'K', home:'UZB', away:'COL', dateBJ:'2026-06-18T10:00:00+08:00', venue:'Mexico City Stadium, Mexico City', status:'upcoming', score:{home:null,away:null}},
+
+  // === GROUP STAGE MATCHDAY 2 (estimated) ===
+  {id:'A3', group:'A', home:'MEX', away:'KOR', dateBJ:'2026-06-19T09:00:00+08:00', venue:'Mexico City Stadium, Mexico City', status:'upcoming', score:{home:null,away:null}},
+  {id:'A4', group:'A', home:'RSA', away:'CZE', dateBJ:'2026-06-19T00:00:00+08:00', venue:'Guadalajara Stadium, Guadalajara', status:'upcoming', score:{home:null,away:null}},
+  {id:'B3', group:'B', home:'CAN', away:'QAT', dateBJ:'2026-06-19T06:00:00+08:00', venue:'Toronto Stadium, Toronto', status:'upcoming', score:{home:null,away:null}},
+  {id:'B4', group:'B', home:'BIH', away:'SUI', dateBJ:'2026-06-19T03:00:00+08:00', venue:'San Francisco Bay Area Stadium, San Francisco Bay Area', status:'upcoming', score:{home:null,away:null}},
+  {id:'C3', group:'C', home:'BRA', away:'HAI', dateBJ:'2026-06-20T08:30:00+08:00', venue:'New York New Jersey Stadium, New York/New Jersey', status:'upcoming', score:{home:null,away:null}},
+  {id:'C4', group:'C', home:'MAR', away:'SCO', dateBJ:'2026-06-20T06:00:00+08:00', venue:'Boston Stadium, Boston', status:'upcoming', score:{home:null,away:null}},
+  {id:'D3', group:'D', home:'USA', away:'AUS', dateBJ:'2026-06-20T03:00:00+08:00', venue:'Los Angeles Stadium, Los Angeles', status:'upcoming', score:{home:null,away:null}},
+  {id:'D4', group:'D', home:'PAR', away:'TUR', dateBJ:'2026-06-20T11:00:00+08:00', venue:'BC Place Vancouver, Vancouver', status:'upcoming', score:{home:null,away:null}},
+  {id:'E3', group:'E', home:'GER', away:'CIV', dateBJ:'2026-06-21T04:00:00+08:00', venue:'Houston Stadium, Houston', status:'upcoming', score:{home:null,away:null}},
+  {id:'E4', group:'E', home:'CUW', away:'ECU', dateBJ:'2026-06-21T08:00:00+08:00', venue:'Philadelphia Stadium, Philadelphia', status:'upcoming', score:{home:null,away:null}},
+  {id:'F3', group:'F', home:'NED', away:'SWE', dateBJ:'2026-06-21T01:00:00+08:00', venue:'Dallas Stadium, Dallas', status:'upcoming', score:{home:null,away:null}},
+  {id:'F4', group:'F', home:'JPN', away:'TUN', dateBJ:'2026-06-21T12:00:00+08:00', venue:'Monterrey Stadium, Monterrey', status:'upcoming', score:{home:null,away:null}},
+  {id:'G3', group:'G', home:'BEL', away:'IRN', dateBJ:'2026-06-22T03:00:00+08:00', venue:'Seattle Stadium, Seattle', status:'upcoming', score:{home:null,away:null}},
+  {id:'G4', group:'G', home:'EGY', away:'NZL', dateBJ:'2026-06-22T09:00:00+08:00', venue:'Los Angeles Stadium, Los Angeles', status:'upcoming', score:{home:null,away:null}},
+  {id:'H3', group:'H', home:'ESP', away:'KSA', dateBJ:'2026-06-22T00:00:00+08:00', venue:'Atlanta Stadium, Atlanta', status:'upcoming', score:{home:null,away:null}},
+  {id:'H4', group:'H', home:'CPV', away:'URU', dateBJ:'2026-06-22T06:00:00+08:00', venue:'Miami Stadium, Miami', status:'upcoming', score:{home:null,away:null}},
+  {id:'I3', group:'I', home:'FRA', away:'IRQ', dateBJ:'2026-06-23T05:00:00+08:00', venue:'New York New Jersey Stadium, New York/New Jersey', status:'upcoming', score:{home:null,away:null}},
+  {id:'I4', group:'I', home:'SEN', away:'NOR', dateBJ:'2026-06-23T08:00:00+08:00', venue:'Boston Stadium, Boston', status:'upcoming', score:{home:null,away:null}},
+  {id:'J3', group:'J', home:'ARG', away:'AUT', dateBJ:'2026-06-23T01:00:00+08:00', venue:'Kansas City Stadium, Kansas City', status:'upcoming', score:{home:null,away:null}},
+  {id:'J4', group:'J', home:'ALG', away:'JOR', dateBJ:'2026-06-23T11:00:00+08:00', venue:'San Francisco Bay Area Stadium, San Francisco Bay Area', status:'upcoming', score:{home:null,away:null}},
+  {id:'K3', group:'K', home:'POR', away:'UZB', dateBJ:'2026-06-24T01:00:00+08:00', venue:'Houston Stadium, Houston', status:'upcoming', score:{home:null,away:null}},
+  {id:'K4', group:'K', home:'COD', away:'COL', dateBJ:'2026-06-24T10:00:00+08:00', venue:'Mexico City Stadium, Mexico City', status:'upcoming', score:{home:null,away:null}},
+  {id:'L3', group:'L', home:'ENG', away:'GHA', dateBJ:'2026-06-24T04:00:00+08:00', venue:'Dallas Stadium, Dallas', status:'upcoming', score:{home:null,away:null}},
+  {id:'L4', group:'L', home:'CRO', away:'PAN', dateBJ:'2026-06-24T07:00:00+08:00', venue:'Toronto Stadium, Toronto', status:'upcoming', score:{home:null,away:null}},
+
+  // === GROUP STAGE MATCHDAY 3 (estimated) ===
+  {id:'A5', group:'A', home:'RSA', away:'KOR', dateBJ:'2026-06-25T09:00:00+08:00', venue:'Mexico City Stadium, Mexico City', status:'upcoming', score:{home:null,away:null}},
+  {id:'A6', group:'A', home:'MEX', away:'CZE', dateBJ:'2026-06-25T09:00:00+08:00', venue:'Guadalajara Stadium, Guadalajara', status:'upcoming', score:{home:null,away:null}},
+  {id:'B5', group:'B', home:'BIH', away:'QAT', dateBJ:'2026-06-25T03:00:00+08:00', venue:'Toronto Stadium, Toronto', status:'upcoming', score:{home:null,away:null}},
+  {id:'B6', group:'B', home:'CAN', away:'SUI', dateBJ:'2026-06-25T03:00:00+08:00', venue:'San Francisco Bay Area Stadium, San Francisco Bay Area', status:'upcoming', score:{home:null,away:null}},
+  {id:'C5', group:'C', home:'MAR', away:'HAI', dateBJ:'2026-06-25T06:00:00+08:00', venue:'New York New Jersey Stadium, New York/New Jersey', status:'upcoming', score:{home:null,away:null}},
+  {id:'C6', group:'C', home:'BRA', away:'SCO', dateBJ:'2026-06-25T06:00:00+08:00', venue:'Boston Stadium, Boston', status:'upcoming', score:{home:null,away:null}},
+  {id:'D5', group:'D', home:'PAR', away:'AUS', dateBJ:'2026-06-25T01:00:00+08:00', venue:'Los Angeles Stadium, Los Angeles', status:'upcoming', score:{home:null,away:null}},
+  {id:'D6', group:'D', home:'USA', away:'TUR', dateBJ:'2026-06-25T01:00:00+08:00', venue:'BC Place Vancouver, Vancouver', status:'upcoming', score:{home:null,away:null}},
+  {id:'E5', group:'E', home:'CUW', away:'CIV', dateBJ:'2026-06-25T17:00:00+08:00', venue:'Houston Stadium, Houston', status:'upcoming', score:{home:null,away:null}},
+  {id:'E6', group:'E', home:'GER', away:'ECU', dateBJ:'2026-06-25T17:00:00+08:00', venue:'Philadelphia Stadium, Philadelphia', status:'upcoming', score:{home:null,away:null}},
+  {id:'F5', group:'F', home:'JPN', away:'SWE', dateBJ:'2026-06-25T20:00:00+08:00', venue:'Dallas Stadium, Dallas', status:'upcoming', score:{home:null,away:null}},
+  {id:'F6', group:'F', home:'NED', away:'TUN', dateBJ:'2026-06-25T20:00:00+08:00', venue:'Monterrey Stadium, Monterrey', status:'upcoming', score:{home:null,away:null}},
+  {id:'G5', group:'G', home:'EGY', away:'IRN', dateBJ:'2026-06-26T22:00:00+08:00', venue:'Seattle Stadium, Seattle', status:'upcoming', score:{home:null,away:null}},
+  {id:'G6', group:'G', home:'BEL', away:'NZL', dateBJ:'2026-06-26T22:00:00+08:00', venue:'Los Angeles Stadium, Los Angeles', status:'upcoming', score:{home:null,away:null}},
+  {id:'H5', group:'H', home:'CPV', away:'KSA', dateBJ:'2026-06-27T01:00:00+08:00', venue:'Atlanta Stadium, Atlanta', status:'upcoming', score:{home:null,away:null}},
+  {id:'H6', group:'H', home:'ESP', away:'URU', dateBJ:'2026-06-27T01:00:00+08:00', venue:'Miami Stadium, Miami', status:'upcoming', score:{home:null,away:null}},
+  {id:'I5', group:'I', home:'SEN', away:'IRQ', dateBJ:'2026-06-27T22:00:00+08:00', venue:'New York New Jersey Stadium, New York/New Jersey', status:'upcoming', score:{home:null,away:null}},
+  {id:'I6', group:'I', home:'FRA', away:'NOR', dateBJ:'2026-06-27T22:00:00+08:00', venue:'Boston Stadium, Boston', status:'upcoming', score:{home:null,away:null}},
+  {id:'J5', group:'J', home:'ALG', away:'AUT', dateBJ:'2026-06-28T01:00:00+08:00', venue:'Kansas City Stadium, Kansas City', status:'upcoming', score:{home:null,away:null}},
+  {id:'J6', group:'J', home:'ARG', away:'JOR', dateBJ:'2026-06-28T01:00:00+08:00', venue:'San Francisco Bay Area Stadium, San Francisco Bay Area', status:'upcoming', score:{home:null,away:null}},
+  {id:'K5', group:'K', home:'COD', away:'UZB', dateBJ:'2026-06-28T17:00:00+08:00', venue:'Houston Stadium, Houston', status:'upcoming', score:{home:null,away:null}},
+  {id:'K6', group:'K', home:'POR', away:'COL', dateBJ:'2026-06-28T17:00:00+08:00', venue:'Mexico City Stadium, Mexico City', status:'upcoming', score:{home:null,away:null}},
+  {id:'L5', group:'L', home:'CRO', away:'GHA', dateBJ:'2026-06-28T20:00:00+08:00', venue:'Dallas Stadium, Dallas', status:'upcoming', score:{home:null,away:null}},
+  {id:'L6', group:'L', home:'ENG', away:'PAN', dateBJ:'2026-06-28T20:00:00+08:00', venue:'Toronto Stadium, Toronto', status:'upcoming', score:{home:null,away:null}},
+
+  // === KNOCKOUT STAGE (TBD - placeholder) ===
+  {id:'R32-1', stage:'R32', home:'TBD', away:'TBD', dateBJ:'2026-06-30T22:00:00+08:00', venue:'TBD', status:'upcoming', score:{home:null,away:null}},
+  {id:'R32-2', stage:'R32', home:'TBD', away:'TBD', dateBJ:'2026-07-01T01:00:00+08:00', venue:'TBD', status:'upcoming', score:{home:null,away:null}},
+  {id:'R16-1', stage:'R16', home:'TBD', away:'TBD', dateBJ:'2026-07-04T22:00:00+08:00', venue:'TBD', status:'upcoming', score:{home:null,away:null}},
+  {id:'QF-1', stage:'QF', home:'TBD', away:'TBD', dateBJ:'2026-07-08T22:00:00+08:00', venue:'TBD', status:'upcoming', score:{home:null,away:null}},
+  {id:'SF-1', stage:'SF', home:'TBD', away:'TBD', dateBJ:'2026-07-14T03:00:00+08:00', venue:'TBD', status:'upcoming', score:{home:null,away:null}},
+  {id:'SF-2', stage:'SF', home:'TBD', away:'TBD', dateBJ:'2026-07-15T03:00:00+08:00', venue:'TBD', status:'upcoming', score:{home:null,away:null}},
+  {id:'3RD', stage:'3RD', home:'TBD', away:'TBD', dateBJ:'2026-07-18T22:00:00+08:00', venue:'TBD', status:'upcoming', score:{home:null,away:null}},
+  {id:'FINAL', stage:'FINAL', home:'TBD', away:'TBD', dateBJ:'2026-07-19T03:00:00+08:00', venue:'New York New Jersey Stadium, New York/New Jersey', status:'upcoming', score:{home:null,away:null}},
+];
+
+// Parse dates
+const MATCHES = RAW_MATCHES.map(m => ({
+  ...m,
+  date: new Date(m.dateBJ),
+  _stage: m.stage || 'group'
+}));
+
+// ===================== STATE =====================
+let currentTab = 'all';
+let currentStage = 'group';
+let apiKey = localStorage.getItem('odds_api_key') || '';
+let oddsCache = {};
+let expandedCards = new Set();
+let liveCount = 0;
+
+// ===================== HELPERS =====================
+function pad(n) { return n.toString().padStart(2,'0'); }
+
+function fmtDate(d) {
+  const m = d.getMonth()+1, day = d.getDate();
+  const weekdays = ['周日','周一','周二','周三','周四','周五','周六'];
+  return `${m}月${day}日 ${weekdays[d.getDay()]}`;
+}
+
+function fmtTime(d) {
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function getCountdown(d) {
+  const now = new Date();
+  const diff = d - now;
+  if (diff <= 0) return '已开始';
+  const days = Math.floor(diff / 86400000);
+  const hrs = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  if (days > 0) return `${days}天${hrs}小时后`;
+  if (hrs > 0) return `${hrs}小时${mins}分钟后`;
+  return `${mins}分钟后`;
+}
+
+function isToday(d) {
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate();
+}
+
+// ===================== MATCH STATUS DETECTION =====================
+const MATCH_DURATION_MS = 150 * 60 * 1000; // 2.5 hours per match
+
+function updateMatchStatuses() {
+  const now = new Date();
+  for (let m of MATCHES) {
+    if (m.home === 'TBD') continue;
+    if (m.status === 'done') continue; // explicitly marked done → keep
+    const kickoff = m.date;
+    const end = new Date(kickoff.getTime() + MATCH_DURATION_MS);
+    if (now >= end) {
+      m.status = 'done';
+      if (m.score.home === null) m.score = { home: '?', away: '?' };
+    } else if (now >= kickoff) {
+      m.status = 'live';
+    }
+    // else stays as 'upcoming'
+  }
+}
+
+function isLive(m) {
+  const now = new Date();
+  if (m.status === 'done') return false;
+  if (m.status === 'live') return true;
+  const kickoff = m.date;
+  const end = new Date(kickoff.getTime() + MATCH_DURATION_MS);
+  return kickoff <= now && now <= end;
+}
+
+function isUpcoming(m) {
+  if (m.status === 'done') return false;
+  if (m.status === 'live') return true;
+  return m.date > new Date();
+}
+
+// ===================== RENDER =====================
+function render() {
+  const container = document.getElementById('content');
+  let matches = [...MATCHES];
+
+  // Filter by stage
+  if (currentStage === 'group') {
+    matches = matches.filter(m => m._stage === 'group');
+  } else if (currentStage === 'r32') {
+    matches = matches.filter(m => m._stage === 'R32');
+  } else if (currentStage === 'r16') {
+    matches = matches.filter(m => m._stage === 'R16');
+  } else if (currentStage === 'qf') {
+    matches = matches.filter(m => m._stage === 'QF');
+  } else if (currentStage === 'sf') {
+    matches = matches.filter(m => m._stage === 'SF' || m._stage === '3RD');
+  } else if (currentStage === 'final') {
+    matches = matches.filter(m => m._stage === 'FINAL');
+  }
+
+  // Filter by tab
+  if (currentTab === 'today') {
+    matches = matches.filter(m => isToday(m.date));
+  } else if (currentTab === 'live') {
+    matches = matches.filter(m => isLive(m));
+  } else if (currentTab === 'upcoming') {
+    matches = matches.filter(m => isUpcoming(m));
+  }
+
+  // Search filter
+  const q = document.getElementById('searchInput')?.value?.trim().toUpperCase() || '';
+  if (q) {
+    matches = matches.filter(m => {
+      if (m.home === 'TBD') return true; // keep TBD in search
+      return (TEAM_NAMES[m.home]||'').includes(q) ||
+        (TEAM_NAMES[m.away]||'').includes(q) ||
+        m.home.includes(q) || m.away.includes(q);
+    });
+  }
+
+  // Update live count
+  liveCount = matches.filter(m => isLive(m)).length;
+  document.getElementById('liveBanner').classList.toggle('show', liveCount > 0);
+
+  // Group by date
+  const grouped = {};
+  for (let m of matches) {
+    const dk = m.date.toISOString().split('T')[0];
+    if (!grouped[dk]) grouped[dk] = [];
+    grouped[dk].push(m);
+  }
+
+  let html = '';
+
+  if (matches.length === 0) {
+    html = '<div class="no-data">📭 暂无匹配的比赛</div>';
+  }
+
+  for (let dk of Object.keys(grouped).sort()) {
+    const dayMatches = grouped[dk];
+    const dateObj = new Date(dk + 'T00:00:00+08:00');
+    html += `<div class="date-header">📅 ${fmtDate(dateObj)} · ${dayMatches.length}场比赛</div>`;
+    html += '<div class="match-grid">';
+
+    for (let m of dayMatches) {
+      const live = isLive(m);
+      const done = m.status === 'done';
+      const cardClass = live ? 'live' : (done ? 'done' : '');
+      const betting = getBettingWindow(m.date);
+      const isExpanded = expandedCards.has(m.id);
+
+      let scoreHtml = '';
+      if (done || live) {
+        scoreHtml = `<div class="score">
+          ${live ? '<span class="live-dot"></span>' : ''}${m.score.home ?? '-'} : ${m.score.away ?? '-'}
+          ${live ? '<span class="minute">LIVE</span>' : ''}
+        </div>`;
+      } else {
+        scoreHtml = `<div class="score" style="color:var(--text-dim);">VS</div>`;
+      }
+
+      let infoHtml = '';
+      if (done) {
+        infoHtml = `<div class="info">
+          <span class="group">${m.group ? 'G' + m.group : m._stage}</span>
+          <div class="time" style="color:var(--text-dim)">${fmtTime(m.date)}</div>
+          <div class="venue">已结束</div>
+        </div>`;
+      } else {
+        infoHtml = `<div class="info">
+          <span class="group">${m.group ? 'G' + m.group : m._stage}</span>
+          <div class="time">${fmtTime(m.date)}</div>
+          <div class="countdown">${live ? '🔴 进行中' : getCountdown(m.date)}</div>
+          <div class="venue">${venueName(m.venue)}</div>
+        </div>`;
+      }
+
+      html += `
+      <div class="match-card ${cardClass}" id="card-${m.id}">
+        <div class="team">
+          ${m.home === 'TBD' ? '<span class="flag flag-na">❓</span>' : `<img class="flag" src="https://flagcdn.com/w40/${COUNTRY_CODES[m.home]}.png" alt="${TEAM_NAMES[m.home]}" loading="lazy">`}
+          <span class="name">${m.home === 'TBD' ? '待定' : TEAM_NAMES[m.home]}</span>
+        </div>
+        ${scoreHtml}
+        <div class="team">
+          ${m.away === 'TBD' ? '<span class="flag flag-na">❓</span>' : `<img class="flag" src="https://flagcdn.com/w40/${COUNTRY_CODES[m.away]}.png" alt="${TEAM_NAMES[m.away]}" loading="lazy">`}
+          <span class="name">${m.away === 'TBD' ? '待定' : TEAM_NAMES[m.away]}</span>
+        </div>
+        ${infoHtml}
+      </div>`;
+
+      // Betting info row (show for non-TBD upcoming matches)
+      if (m.home !== 'TBD' && !done) {
+        html += `
+        <div style="grid-column:1/-1;padding:6px 18px 10px;font-size:19px;display:flex;gap:20px;flex-wrap:wrap;color:var(--text-dim);border-bottom:1px solid var(--border);margin-bottom:4px;">
+          <span>🎲 <span style="color:var(--bet-accent);font-weight:600;">竞彩</span> 投注: <span style="color:var(--text);font-family:monospace;">${betting.open}</span> → <span style="color:var(--text);font-family:monospace;">${betting.deadline}</span> 截止</span>
+          <span class="tooltip" data-tip="竞彩销售: 周一至五11:00-22:00 / 周末11:00-23:00">⏰ 销售时段: ${betting.isWeekend ? '周末 11-23时' : '工作日 11-22时'}</span>
+          <span class="expand-btn" onclick="toggleOdds('${m.id}')">📊 ${isExpanded ? '收起赔率' : '展开赔率'}</span>
+        </div>`;
+
+        if (isExpanded) {
+          html += `<div style="grid-column:1/-1;padding:0 18px 12px;" id="odds-${m.id}">`;
+          html += renderOddsPanel(m);
+          html += '</div>';
+        }
+      }
+    }
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
+  updateButtonStates();
+}
+
+function renderOddsPanel(m) {
+  const cached = oddsCache[m.id];
+  if (!cached) {
+    if (apiKey) {
+      // innerHTML doesn't execute script tags - trigger fetch asynchronously
+      setTimeout(() => fetchOdds(m.id), 10);
+      return `<div class="loading"><span class="spinner"></span>正在获取赔率数据...</div>`;
+    }
+    return `<div style="padding:12px;color:var(--text-dim);font-size:13px;">
+      ⚠️ 未设置赔率 API Key<br>
+      <a href="https://the-odds-api.com/#get-access" target="_blank" style="color:var(--accent2);">获取免费 API Key →</a>
+      &nbsp;然后点击右上角 🔑 按钮设置
+    </div>`;
+  }
+
+  if (cached._error) {
+    return `<div style="padding:12px;color:var(--odd-down);font-size:13px;">❌ ${cached._error}</div>`;
+  }
+
+  if (!cached.bookmakers || cached.bookmakers.length === 0) {
+    return `<div style="padding:12px;color:var(--text-dim);font-size:13px;">📊 暂无赔率数据</div>`;
+  }
+
+  let html = '<table class="odds-table"><thead><tr><th>博彩公司</th><th>主胜</th><th>平局</th><th>客胜</th><th>更新时间</th></tr></thead><tbody>';
+
+  const bestHome = Math.max(...cached.bookmakers.map(b => b.home || 0));
+  const bestDraw = Math.max(...cached.bookmakers.map(b => b.draw || 0));
+  const bestAway = Math.max(...cached.bookmakers.map(b => b.away || 0));
+
+  for (let b of cached.bookmakers) {
+    html += `<tr>
+      <td>${b.name}</td>
+      <td class="odd-val ${b.home === bestHome ? 'best-odd' : ''}">${b.home?.toFixed(2) || '-'}</td>
+      <td class="odd-val ${b.draw === bestDraw ? 'best-odd' : ''}">${b.draw?.toFixed(2) || '-'}</td>
+      <td class="odd-val ${b.away === bestAway ? 'best-odd' : ''}">${b.away?.toFixed(2) || '-'}</td>
+      <td style="font-size:11px;color:var(--text-dim);">${b.updated || ''}</td>
+    </tr>`;
+  }
+
+  html += '</tbody></table>';
+  html += `<div style="font-size:11px;color:var(--text-dim);margin-top:6px;">🟢 绿色 = 该选项最优赔率 · 数据来源: The Odds API</div>`;
+  return html;
+}
+
+// ===================== DEBUG PANEL =====================
+let debugVisible = false;
+let debugLines = [];
+
+function updateDebug(msg) {
+  debugLines.push(msg);
+  if (debugLines.length > 20) debugLines.shift();
+  const el = document.getElementById('debugContent');
+  if (el) el.innerHTML = debugLines.join('<br>');
+  console.log('[赔率]', msg.replace(/<br>/g, '\n'));
+}
+
+function toggleDebug() {
+  debugVisible = !debugVisible;
+  document.getElementById('debugPanel').style.display = debugVisible ? 'block' : 'none';
+  document.getElementById('debugToggle').textContent = debugVisible ? '🐛 隐藏调试' : '🐛 调试';
+}
+
+function clearDebug() {
+  debugLines = [];
+  const el = document.getElementById('debugContent');
+  if (el) el.innerHTML = '<span style="color:var(--text-dim)">展开赔率时显示 API 请求详情</span>';
+}
+
+// ===================== ODDS API =====================
+async function fetchOdds(matchId) {
+  if (!apiKey) return;
+  if (oddsCache[matchId] && !oddsCache[matchId]._error) return;
+
+  const match = MATCHES.find(m => m.id === matchId);
+  if (!match || match.home === 'TBD') return;
+
+  oddsCache[matchId] = { _loading: true };
+  render();
+
+  try {
+    // The Odds API v4
+    const sportKey = 'soccer_fifa_world_cup';
+    const regions = 'uk,us,eu'; // bet365, pinnacle, williamhill, etc.
+    const markets = 'h2h';
+    const url = `https://api.the-odds-api.com/v4/sports/${sportKey}/odds/?apiKey=${apiKey}&regions=${regions}&markets=${markets}&oddsFormat=decimal`;
+
+    console.log(`[赔率] 请求: ${url.replace(apiKey, '***')}`);
+    updateDebug(`🔍 请求中... (URL已隐藏API Key)`);
+    const resp = await fetch(url);
+    const remaining = resp.headers.get('x-requests-remaining') || 'N/A';
+    console.log(`[赔率] 状态: ${resp.status}, 剩余配额: ${remaining}`);
+    updateDebug(`📡 响应: HTTP ${resp.status} | 剩余配额: ${remaining}`);
+    if (!resp.ok) {
+      const err = await resp.text();
+      console.error(`[赔率] 错误响应:`, err);
+      updateDebug(`❌ HTTP ${resp.status}: ${err.substring(0,200)}`);
+      throw new Error(`API错误 (${resp.status}): ${err.substring(0,150)}`);
+    }
+
+    const data = await resp.json();
+
+    // Find the specific match using alias-based fuzzy matching
+    const homeAliases = TEAM_ALIASES[match.home] || [match.home.toLowerCase()];
+    const awayAliases = TEAM_ALIASES[match.away] || [match.away.toLowerCase()];
+    console.log(`[赔率] 查找: ${match.home}=[${homeAliases.join(', ')}] vs ${match.away}=[${awayAliases.join(', ')}]`);
+    updateDebug(`🎯 匹配: ${match.home}(${homeAliases.join(',')}) vs ${match.away}(${awayAliases.join(',')})`);
+    console.log(`[赔率] API返回${data.length}场比赛`);
+    updateDebug(`✅ 获取成功: ${data.length} 场比赛`);
+
+    function matchesTeam(apiName, aliases) {
+      const name = (apiName || '').toLowerCase().trim();
+      return aliases.some(a => name === a || name.includes(a) || a.includes(name));
+    }
+
+    const matchData = data.find(event => {
+      return matchesTeam(event.home_team, homeAliases) &&
+             matchesTeam(event.away_team, awayAliases);
+    });
+
+    if (!matchData || !matchData.bookmakers) {
+      console.log(`[赔率] 未匹配到 [${homeAliases.join(', ')}] vs [${awayAliases.join(', ')}]。API返回的赛事:`);
+      let eventList = '<br>📋 API返回的队伍名:<br>';
+      data.slice(0, 15).forEach(e => {
+        console.log(`  - ${e.home_team} vs ${e.away_team} (${e.commence_time})`);
+        eventList += `• ${e.home_team} vs ${e.away_team}<br>`;
+      });
+      updateDebug(`⚠️ 未匹配到 "${TEAM_NAMES[match.home]||match.home} vs ${TEAM_NAMES[match.away]||match.away}"${eventList}${data.length > 15 ? `...等共${data.length}场` : ''}`);
+      oddsCache[matchId] = { _error: `未找到 ${TEAM_NAMES[match.home]||match.home} vs ${TEAM_NAMES[match.away]||match.away} 的赔率`, bookmakers: [] };
+    } else {
+      const bookmakers = matchData.bookmakers.map(bm => {
+        const h2h = bm.markets?.find(mk => mk.key === 'h2h');
+        const outcomes = h2h?.outcomes || [];
+        const homeTeamName = matchData.home_team;
+        const awayTeamName = matchData.away_team;
+        return {
+          name: bm.title,
+          home: outcomes.find(o => o.name === homeTeamName)?.price || null,
+          draw: outcomes.find(o => o.name === 'Draw')?.price || null,
+          away: outcomes.find(o => o.name === awayTeamName)?.price || null,
+          updated: new Date().toLocaleTimeString('zh-CN')
+        };
+      }).filter(b => b.home || b.draw || b.away);
+
+      oddsCache[matchId] = { bookmakers, _updated: Date.now() };
+    }
+  } catch (e) {
+    oddsCache[matchId] = { _error: e.message, bookmakers: [] };
+  }
+
+  render();
+}
+
+function toggleOdds(id) {
+  if (expandedCards.has(id)) {
+    expandedCards.delete(id);
+  } else {
+    expandedCards.add(id);
+    if (apiKey && !oddsCache[id]) {
+      fetchOdds(id);
+    }
+  }
+  render();
+}
+
+// ===================== BAIDU SCORES (free, no quota) =====================
+let baiduScoresCache = null;
+let baiduScoresLastFetch = 0;
+const BAIDU_SCORES_URL = '/api/scores';
+const BAIDU_REFRESH_MS = 120000; // every 2 minutes
+
+async function fetchBaiduScores(force = false) {
+  if (!force && (Date.now() - baiduScoresLastFetch) < BAIDU_REFRESH_MS) return;
+  baiduScoresLastFetch = Date.now();
+
+  try {
+    const resp = await fetch(BAIDU_SCORES_URL);
+    if (!resp.ok) {
+      updateDebug(`⚠️ 百度比分: HTTP ${resp.status}`);
+      return;
+    }
+    const data = await resp.json();
+    if (!data.matches) return;
+
+    baiduScoresCache = data;
+    applyBaiduScores(data.matches);
+    updateDebug(`📡 百度比分: ${data.matches.length} 场 (${data.updated?.substring(11,19) || '?'})`);
+  } catch (e) {
+    updateDebug(`⚠️ 百度比分代理未连接: ${e.message}`);
+  }
+}
+
+function applyBaiduScores(apiMatches) {
+  // Build reverse lookup: Chinese team name -> code
+  const nameToCode = {};
+  for (const [code, name] of Object.entries(TEAM_NAMES)) {
+    nameToCode[name] = code;
+  }
+
+  let applied = 0;
+  for (let m of MATCHES) {
+    if (m.home === 'TBD') continue;
+    const homeAliases = TEAM_ALIASES[m.home] || [m.home.toLowerCase()];
+    const awayAliases = TEAM_ALIASES[m.away] || [m.away.toLowerCase()];
+
+    for (let am of apiMatches) {
+      const ah = (am.home || '').trim();
+      const aa = (am.away || '').trim();
+
+      // Primary: Chinese name -> code lookup (Baidu returns Chinese)
+      const codeMatch = (nameToCode[ah] === m.home && nameToCode[aa] === m.away);
+
+      // Fallback: English alias matching
+      function matchesAlias(name, aliases) {
+        const n = (name || '').toLowerCase().trim();
+        return aliases.some(a => n === a.toLowerCase() || n.includes(a.toLowerCase()) || a.toLowerCase().includes(n));
+      }
+      const aliasMatch = matchesAlias(ah.toLowerCase(), homeAliases) && matchesAlias(aa.toLowerCase(), awayAliases);
+
+      if (codeMatch || aliasMatch) {
+        // Update status from Baidu
+        if (am.status === 'done') m.status = 'done';
+        else if (am.status === 'live') m.status = 'live';
+        // Update score if available
+        if (am.score && am.score.home !== null) {
+          m.score = { home: am.score.home, away: am.score.away };
+        }
+        applied++;
+        break;
+      }
+    }
+  }
+  if (applied > 0) updateDebug(`📊 百度比分匹配: ${applied} 场`);
+}
+
+// ===================== CONTROLS =====================
+function switchTab(tab) {
+  currentTab = tab;
+  render();
+}
+
+function switchStage(stage) {
+  currentStage = stage;
+  document.querySelectorAll('#stageTabs .tab').forEach((t, i) => {
+    const stages = ['group','r32','r16','qf','sf','final'];
+    t.classList.toggle('active', stages[i] === stage);
+  });
+  render();
+}
+
+function updateButtonStates() {
+  document.getElementById('btnAll').classList.toggle('active', currentTab === 'all');
+  document.getElementById('btnToday').classList.toggle('active', currentTab === 'today');
+  document.getElementById('btnLive').classList.toggle('active', currentTab === 'live');
+  document.getElementById('btnUpcoming').classList.toggle('active', currentTab === 'upcoming');
+}
+
+function filterMatches() {
+  render();
+}
+
+// ===================== API KEY MODAL =====================
+function showApiKeyModal() {
+  document.getElementById('apiKeyModal').classList.add('show');
+  document.getElementById('apiKeyInput').value = apiKey;
+  document.getElementById('apiStatus').textContent = apiKey ? '✅ 已设置 API Key' : '';
+}
+
+function closeApiKeyModal() {
+  document.getElementById('apiKeyModal').classList.remove('show');
+}
+
+function saveApiKey() {
+  apiKey = document.getElementById('apiKeyInput').value.trim();
+  localStorage.setItem('odds_api_key', apiKey);
+  document.getElementById('apiStatus').textContent = '✅ API Key 已保存';
+  oddsCache = {};
+  expandedCards.clear();
+  setTimeout(closeApiKeyModal, 800);
+  render();
+}
+
+function clearApiKey() {
+  apiKey = '';
+  localStorage.removeItem('odds_api_key');
+  oddsCache = {};
+  expandedCards.clear();
+  document.getElementById('apiStatus').textContent = '🗑️ API Key 已清除';
+  setTimeout(closeApiKeyModal, 800);
+  render();
+}
+
+// ===================== AUTO REFRESH =====================
+let refreshTimer;
+function startAutoRefresh() {
+  refreshTimer = setInterval(async () => {
+    // Fetch Baidu live scores (free, no quota)
+    await fetchBaiduScores();
+    // Update match statuses (fallback time-based detection)
+    updateMatchStatuses();
+    // Update countdowns and live status display
+    if (currentTab === 'live' || currentTab === 'all' || currentTab === 'today') {
+      render();
+    }
+    // Refresh odds for expanded cards every 60 seconds
+    for (let id of expandedCards) {
+      if (apiKey && oddsCache[id] && (Date.now() - (oddsCache[id]._updated || 0) > 60000)) {
+        fetchOdds(id);
+      }
+    }
+  }, 30000);
+}
+
+// ===================== INIT =====================
+async function init() {
+  if (apiKey) {
+    document.getElementById('apiStatus').textContent = '✅ 已设置 API Key';
+  }
+  // Auto-detect match status based on current time
+  updateMatchStatuses();
+  render();
+  // Fetch live scores immediately, then start periodic refresh
+  await fetchBaiduScores(true);
+  render();
+  startAutoRefresh();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

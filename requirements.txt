@@ -1,0 +1,1 @@
+# scores_proxy.py uses only Python stdlib, no external deps
