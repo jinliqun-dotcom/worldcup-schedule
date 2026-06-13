@@ -32,6 +32,11 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/api/scores":
             self.serve_scores()
+        elif self.path == "/" or self.path == "/index.html":
+            self.path = "/worldcup.html"
+            super().do_GET()
+        elif self.path.startswith("/.git") or self.path.startswith("/.venv"):
+            self.send_error(403, "Forbidden")
         else:
             super().do_GET()
 
