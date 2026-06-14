@@ -51,19 +51,21 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
 
             matches = parse_scores(html)
 
-            # Fallback: scrape al/match page for today's completed matches
-            # that the subscribe API hasn't indexed yet
+            # Fallback: scrape al/match pages for past 3 days' scores
+            # (subscribe API only returns today/upcoming, misses yesterday)
             try:
-                page_matches = fetch_today_page_scores()
-                # Merge: today-page completed results override subscribe data
-                # Match by team names (Chinese)
+                today = datetime.date.today()
+                all_page_matches = []
+                for offset in (0, 1, 2):
+                    date_str = (today - datetime.timedelta(days=offset)).strftime("%Y-%m-%d")
+                    all_page_matches.extend(fetch_page_scores(date_str))
+                # Merge: page results override subscribe data
                 merged = []
-                page_keys = {(m["home"], m["away"]) for m in page_matches}
+                page_keys = {(m["home"], m["away"]) for m in all_page_matches}
                 for m in matches:
                     key = (m["home"], m["away"])
                     if key in page_keys:
-                        # Replace with fresher data from today's page
-                        for pm in page_matches:
+                        for pm in all_page_matches:
                             if pm["home"] == m["home"] and pm["away"] == m["away"]:
                                 merged.append(pm)
                                 break
@@ -71,7 +73,7 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
                         merged.append(m)
                 # Add page matches not in subscribe at all
                 sub_keys = {(m["home"], m["away"]) for m in matches}
-                for pm in page_matches:
+                for pm in all_page_matches:
                     if (pm["home"], pm["away"]) not in sub_keys:
                         merged.append(pm)
                 matches = merged
@@ -156,11 +158,10 @@ def parse_scores(html):
     return matches
 
 
-def fetch_today_page_scores():
-    """Fallback: scrape al/match page for today's completed matches
-    that subscribe API hasn't indexed yet. Uses tag-stripped text extraction."""
-    today = datetime.date.today().strftime("%Y-%m-%d")
-    url = f"https://tiyu.baidu.com/al/match?match=%E4%B8%96%E7%95%8C%E6%9D%AF&date_time={today}&tab=%E8%B5%9B%E7%A8%8B&from=baidu_aladdin"
+def fetch_page_scores(date_str):
+    """Scrape al/match page for completed matches on a given date.
+    date_str: YYYY-MM-DD format."""
+    url = f"https://tiyu.baidu.com/al/match?match=%E4%B8%96%E7%95%8C%E6%9D%AF&date_time={date_str}&tab=%E8%B5%9B%E7%A8%8B&from=baidu_aladdin"
     try:
         req = urllib.request.Request(url, headers={
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
