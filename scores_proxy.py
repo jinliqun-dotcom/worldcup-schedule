@@ -59,6 +59,14 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
                 for offset in (0, 1, 2):
                     date_str = (today - datetime.timedelta(days=offset)).strftime("%Y-%m-%d")
                     all_page_matches.extend(fetch_page_scores(date_str))
+                # Deduplicate page matches by (home, away) key
+                deduped = {}
+                for m in all_page_matches:
+                    k = (m["home"], m["away"])
+                    if k not in deduped:
+                        deduped[k] = m
+                all_page_matches = list(deduped.values())
+
                 # Merge: page results override subscribe data
                 merged = []
                 page_keys = {(m["home"], m["away"]) for m in all_page_matches}
