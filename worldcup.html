@@ -802,6 +802,8 @@ function render() {
 
   for (let dk of Object.keys(grouped).sort()) {
     const dayMatches = grouped[dk];
+    // 按比赛时间排序，确保同一天内比赛按时间先后展示
+    dayMatches.sort((a, b) => a.date - b.date);
     const dateObj = new Date(dk + 'T00:00:00+08:00');
     html += `<div class="date-header">📅 ${fmtDate(dateObj)} · ${dayMatches.length}场比赛</div>`;
     html += '<div class="match-grid">';
