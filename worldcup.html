@@ -591,7 +591,7 @@ footer {
     <button class="btn btn-live" id="btnLive" onclick="switchTab('live')">🔴 进行中</button>
     <button class="btn" id="btnUpcoming" onclick="switchTab('upcoming')">⏳ 即将开始</button>
     <button class="btn" id="debugToggle" onclick="toggleDebug()" style="background:#222;color:#0f0;border-color:#444;font-family:monospace;font-size:12px;">🐛 调试</button>
-    <button class="btn pyramid-btn" id="btnPyramid" onclick="togglePyramid()">🏆 金字塔</button>
+    <button class="btn pyramid-btn" id="btnPyramid" onclick="togglePyramid()">🏆 赛程金字塔</button>
   </div>
 </header>
 
@@ -1502,21 +1502,15 @@ function togglePyramid() {
   pyramidVisible = !pyramidVisible;
   const btn = document.getElementById('btnPyramid');
   const container = document.getElementById('pyramidContainer');
-  const content = document.getElementById('content');
-  const tabs = document.getElementById('stageTabs');
 
   if (pyramidVisible) {
     btn.classList.add('active');
     container.style.display = 'block';
-    content.style.display = 'none';
-    tabs.style.display = 'none';
     buildPyramid();
+    container.scrollIntoView({ behavior: 'smooth' });
   } else {
     btn.classList.remove('active');
     container.style.display = 'none';
-    content.style.display = 'block';
-    tabs.style.display = 'flex';
-    render();
   }
 }
 
@@ -1551,7 +1545,17 @@ function buildPyramid() {
 
   const teamName = (code) => TEAM_NAMES[code] || code;
 
+  const fmtBJ = (d) => {
+    if (!d) return '';
+    const m = (d.getMonth()+1).toString().padStart(2,'0');
+    const day = d.getDate().toString().padStart(2,'0');
+    const h = d.getHours().toString().padStart(2,'0');
+    const min = d.getMinutes().toString().padStart(2,'0');
+    return `${m}/${day} ${h}:${min}`;
+  };
+
   const renderMatchSlot = (m, cls = '') => {
+    const mDate = m && m.date ? fmtBJ(m.date) : '';
     if (!m || m.home === 'TBD') {
       return `<div class="p-slot slot-upcoming ${cls}">
         <div class="p-teams">
@@ -1559,19 +1563,19 @@ function buildPyramid() {
           <div class="p-vs">V S</div>
           <div class="p-team"><span class="p-tbd">待定</span></div>
         </div>
+        ${mDate ? `<div class="p-date">📅 ${mDate}</div>` : ''}
       </div>`;
     }
     const hScore = m.score && m.score.home !== null && m.score.home !== '?' ? m.score.home : '';
     const aScore = m.score && m.score.away !== null && m.score.away !== '?' ? m.score.away : '';
     const statusCls = m.status === 'done' ? 'slot-done' : m.status === 'live' ? 'slot-live' : 'slot-upcoming';
-    const mDate = m.date ? m.date.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' }) + ' ' + m.date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
     return `<div class="p-slot ${statusCls} ${cls}">
       <div class="p-teams">
         <div class="p-team">${flagImg(m.home)} ${teamName(m.home)} ${hScore !== '' ? `<span class="p-score">${hScore}</span>` : ''}</div>
         <div class="p-vs">V S</div>
         <div class="p-team">${flagImg(m.away)} ${teamName(m.away)} ${aScore !== '' ? `<span class="p-score">${aScore}</span>` : ''}</div>
       </div>
-      ${mDate ? `<div class="p-date">${mDate}</div>` : ''}
+      ${mDate ? `<div class="p-date">📅 ${mDate}</div>` : ''}
     </div>`;
   };
 
