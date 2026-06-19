@@ -1043,6 +1043,35 @@ function toggleOdds(id) {
   render();
 }
 
+// ===================== SCORE PERSISTENCE (localStorage) =====================
+const SCORES_KEY = 'wc2026_scores';
+
+function loadCachedScores() {
+  try {
+    return JSON.parse(localStorage.getItem(SCORES_KEY)) || {};
+  } catch { return {}; }
+}
+
+function saveCachedScore(matchId, score) {
+  const cache = loadCachedScores();
+  cache[matchId] = score;
+  localStorage.setItem(SCORES_KEY, JSON.stringify(cache));
+}
+
+function restoreScores() {
+  const cache = loadCachedScores();
+  let restored = 0;
+  for (let m of MATCHES) {
+    if (cache[m.id] && cache[m.id].home !== null && cache[m.id].home !== '?') {
+      m.score = cache[m.id];
+      m.status = 'done';
+      restored++;
+    }
+  }
+  if (restored > 0) console.log(`📦 从缓存恢复了 ${restored} 场比赛比分`);
+  return restored;
+}
+
 // ===================== BAIDU SCORES (free, no quota) =====================
 let baiduScoresCache = null;
 let baiduScoresLastFetch = 0;
@@ -1070,10 +1099,33 @@ async function fetchBaiduScores(force = false) {
   }
 }
 
+// Alternate Chinese names (Baidu may use different translations)
+const TEAM_ALT_ZH = {
+  '刚果民主共和国':'COD', '民主刚果':'COD', '刚果(金)':'COD',
+  '捷克共和国':'CZE', '韩国队':'KOR', '大韩民国':'KOR',
+  '荷兰队':'NED', '德意志':'GER', '法兰西':'FRA',
+  '英格兰队':'ENG', '葡萄牙队':'POR', '阿根廷队':'ARG',
+  '巴西队':'BRA', '西班牙队':'ESP', '比利时队':'BEL',
+  '科特迪瓦队':'CIV', '库拉索队':'CUW', '海地队':'HAI',
+  '沙特队':'KSA', '沙特':'KSA', '伊朗队':'IRN', '伊朗伊斯兰共和国':'IRN',
+  '新西兰队':'NZL', '土耳其队':'TUR', '突尼斯队':'TUN',
+  '佛得角队':'CPV', '苏格兰队':'SCO', '加拿大队':'CAN',
+  '波黑队':'BIH', '卡塔尔队':'QAT', '瑞士队':'SUI',
+  '摩洛哥队':'MAR', '巴拉圭队':'PAR', '澳大利亚队':'AUS',
+  '塞内加尔队':'SEN', '伊拉克队':'IRQ', '挪威队':'NOR',
+  '阿尔及利亚队':'ALG', '奥地利队':'AUT', '约旦队':'JOR',
+  '乌兹别克队':'UZB', '哥伦比亚队':'COL', '克罗地亚队':'CRO',
+  '加纳队':'GHA', '巴拿马队':'PAN', '厄瓜多尔队':'ECU',
+  '瑞典队':'SWE', '埃及队':'EGY', '乌拉圭队':'URU',
+};
+
 function applyBaiduScores(apiMatches) {
-  // Build reverse lookup: Chinese team name -> code
+  // Build reverse lookup: Chinese team name -> code (primary + alternates)
   const nameToCode = {};
   for (const [code, name] of Object.entries(TEAM_NAMES)) {
+    nameToCode[name] = code;
+  }
+  for (const [name, code] of Object.entries(TEAM_ALT_ZH)) {
     nameToCode[name] = code;
   }
 
@@ -1102,8 +1154,12 @@ function applyBaiduScores(apiMatches) {
         if (am.status === 'done') m.status = 'done';
         else if (am.status === 'live') m.status = 'live';
         // Update score if available
-        if (am.score && am.score.home !== null) {
+        if (am.score && am.score.home !== null && am.score.home !== undefined) {
           m.score = { home: am.score.home, away: am.score.away };
+          // Persist to localStorage so scores survive page refresh / API gaps
+          if (am.status === 'done') {
+            saveCachedScore(m.id, m.score);
+          }
         }
         applied++;
         break;
@@ -1195,6 +1251,14 @@ function startAutoRefresh() {
 async function init() {
   if (apiKey) {
     document.getElementById('apiStatus').textContent = '✅ 已设置 API Key';
+  }
+  // Restore cached scores from localStorage (survive page refresh / API gaps)
+  restoreScores();
+  // Save hardcoded initial scores to cache
+  for (let m of MATCHES) {
+    if (m.status === 'done' && m.score.home !== null && m.score.home !== '?') {
+      saveCachedScore(m.id, m.score);
+    }
   }
   // Auto-detect match status based on current time
   updateMatchStatuses();
