@@ -16,7 +16,7 @@ import time as _time
 from html import unescape
 
 PORT = int(os.environ.get("PORT", 8765))
-BIND = "0.0.0.0" if os.environ.get("RENDER") else "127.0.0.1"
+BIND = "0.0.0.0"
 HTML_DIR = os.path.dirname(os.path.abspath(__file__))
 BAIDU_API = "https://tiyu.baidu.com/api/na/subscribe?subscribeID=69&appKey=NA_matchschedule"
 
