@@ -1622,6 +1622,7 @@ function buildPyramid() {
            </div>`
         : `<div class="p-slot p-champion slot-upcoming">
             <div class="p-teams"><div class="p-team"><span class="p-tbd">❓</span></div></div>
+            ${finalMatch ? `<div class="p-date">📅 ${fmtBJ(finalMatch.date)}</div>` : ''}
            </div>`}
     </div>
   </div>`;
