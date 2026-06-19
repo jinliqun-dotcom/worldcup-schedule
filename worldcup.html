@@ -1669,50 +1669,38 @@ function buildPyramid() {
     return `<div class="p-connector-row"><div class="p-conn-spacer"></div><div class="p-conn-slots">${cells}</div></div>`;
   };
 
-  const stageOrder = ['FINAL', '3RD', 'SF', 'QF', 'R16', 'R32'];
+  const stageOrder = ['SF', 'QF', 'R16', 'R32'];
 
   let html = '';
 
-  // Champion slot
+  // Row 1: 冠军赛 (FINAL match — winner becomes champion)
   const finalMatches = kMatches['FINAL'] || [];
   const finalMatch = finalMatches.length > 0 ? finalMatches[0] : null;
   html += `<div class="p-level">
-    <div class="p-level-label">👑 冠军</div>
+    <div class="p-level-label">🏆 冠军赛</div>
     <div class="p-level-slots">
-      ${finalMatch && finalMatch.status === 'done'
-        ? `<div class="p-slot p-champion slot-done">
-            <div class="p-teams">
-              <div class="p-team">
-                ${finalMatch.score.home > finalMatch.score.away ? flagImg(finalMatch.home) + ' ' + teamName(finalMatch.home) : flagImg(finalMatch.away) + ' ' + teamName(finalMatch.away)}
-              </div>
-            </div>
-           </div>`
-        : `<div class="p-slot p-champion slot-upcoming">
-            <div class="p-teams"><div class="p-team"><span class="p-tbd">❓</span></div></div>
-            ${finalMatch ? `<div class="p-date">📅 ${fmtBJ(finalMatch.date)}</div>` : ''}
-           </div>`}
+      ${finalMatch
+        ? renderMatchSlot(finalMatch, finalMatch.status === 'done' ? 'p-champion' : '')
+        : `<div class="p-slot slot-upcoming"><div class="p-teams"><div class="p-team"><span class="p-tbd">❓</span></div></div></div>`}
     </div>
   </div>`;
 
-  // Connector: champion → final/3rd
-  html += renderConnectorRow(1);
-
-  // Final + 3rd Place row
-  const fMatch = finalMatch;
+  // Row 2: 季军赛 (3RD Place match)
   const tMatches = kMatches['3RD'] || [];
   const tMatch = tMatches.length > 0 ? tMatches[0] : null;
   html += `<div class="p-level">
-    <div class="p-level-label">决赛 / 季军</div>
+    <div class="p-level-label">🥉 季军赛</div>
     <div class="p-level-slots">
       ${renderMatchSlot(tMatch)}
-      ${renderMatchSlot(fMatch)}
     </div>
   </div>`;
 
+  // Connector: both finals ← semi-finals
+  html += renderConnectorRow(2);
+
   // Knockout levels (SF → R32)
-  let prevCount = 2; // Final/3rd has 2 slots → connector count starts at 2
+  let prevCount = 2; // SF has 2 slots → connector to QF
   for (let stage of stageOrder) {
-    if (stage === 'FINAL' || stage === '3RD') continue;
     const matches = kMatches[stage] || [];
     if (matches.length === 0) continue;
 
