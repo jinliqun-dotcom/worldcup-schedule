@@ -346,6 +346,226 @@ footer {
   .odds-table { font-size: 11px; }
   .odds-table th, .odds-table td { padding: 5px 4px; }
 }
+
+
+/* ========== PYRAMID / BRACKET ========== */
+.pyramid-wrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px 10px 30px;
+  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  border-radius: 12px;
+  margin: 10px 0;
+}
+.pyramid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: max-content;
+  margin: 0 auto;
+}
+.p-level {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+.p-level-label {
+  width: 90px;
+  min-width: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  font-size: 11px;
+  color: #f0c040;
+  font-weight: 700;
+  text-align: right;
+  text-transform: uppercase;
+  line-height: 1.2;
+  letter-spacing: 0.5px;
+}
+.p-level-slots {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  justify-content: center;
+}
+.p-slot {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 6px 10px;
+  min-width: 130px;
+  max-width: 160px;
+  text-align: center;
+  transition: all 0.2s;
+  cursor: default;
+  position: relative;
+}
+.p-slot:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.3);
+}
+.p-slot .p-teams {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.p-slot .p-team {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #e0e0e0;
+  justify-content: center;
+}
+.p-slot .p-team img {
+  width: 18px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.p-slot .p-team .p-score {
+  font-weight: 700;
+  color: #f0c040;
+  min-width: 14px;
+  font-size: 12px;
+}
+.p-slot .p-team .p-tbd {
+  color: rgba(255,255,255,0.3);
+  font-size: 10px;
+}
+.p-slot .p-vs {
+  font-size: 9px;
+  color: rgba(255,255,255,0.2);
+  margin: 2px 0;
+  letter-spacing: 1px;
+}
+.p-slot .p-date {
+  font-size: 9px;
+  color: rgba(255,255,255,0.3);
+  margin-top: 4px;
+}
+.p-slot.slot-done { border-color: rgba(158,158,158,0.3); }
+.p-slot.slot-live { border-color: #d32f2f; box-shadow: 0 0 8px rgba(211,47,47,0.3); }
+.p-slot.slot-upcoming { border-color: rgba(25,118,210,0.3); }
+
+.p-champion {
+  background: linear-gradient(135deg, rgba(199,138,8,0.2), rgba(199,138,8,0.05));
+  border: 2px solid #c78a08;
+  min-width: 200px;
+  max-width: 260px;
+  padding: 12px 20px;
+}
+.p-champion .p-teams .p-team {
+  font-size: 14px;
+  color: #ffd54f;
+  font-weight: 700;
+}
+.p-champion::before {
+  content: "ðŸ†";
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+}
+
+.p-connectors {
+  display: flex;
+  justify-content: center;
+  gap: calc(6px + 130px + 6px);
+  width: 100%;
+  height: 10px;
+  align-items: center;
+}
+.p-connectors::before {
+  content: "";
+  width: 90px;
+  min-width: 90px;
+}
+.p-connector {
+  width: calc(130px + 6px);
+  height: 2px;
+  background: rgba(255,255,255,0.15);
+  position: relative;
+}
+.p-connector::before,
+.p-connector::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  height: 8px;
+  background: rgba(255,255,255,0.15);
+}
+.p-connector::before { left: 25%; }
+.p-connector::after { right: 25%; }
+
+.p-groups {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  padding: 8px 0;
+}
+@media (max-width: 900px) {
+  .p-groups { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 600px) {
+  .p-groups { grid-template-columns: repeat(3, 1fr); }
+}
+.p-group {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  padding: 4px 6px;
+  text-align: center;
+}
+.p-group .p-group-name {
+  font-size: 10px;
+  color: #f0c040;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.p-group .p-group-teams {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.p-group .p-gt {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  color: #ccc;
+  justify-content: center;
+}
+.p-group .p-gt img {
+  width: 14px;
+  height: 10px;
+  border-radius: 1px;
+}
+.p-group .p-gt .p-gt-pts {
+  color: rgba(255,255,255,0.4);
+  font-size: 9px;
+  margin-left: 2px;
+}
+
+.pyramid-btn {
+  background: linear-gradient(135deg, #1a1a2e, #16213e) !important;
+  color: #f0c040 !important;
+  border-color: #c78a08 !important;
+  font-weight: 700 !important;
+}
+.pyramid-btn.active {
+  background: linear-gradient(135deg, #c78a08, #b8860b) !important;
+  color: #fff !important;
+  border-color: #ffd54f !important;
+}
 </style>
 </head>
 <body>
@@ -371,6 +591,7 @@ footer {
     <button class="btn btn-live" id="btnLive" onclick="switchTab('live')">🔴 进行中</button>
     <button class="btn" id="btnUpcoming" onclick="switchTab('upcoming')">⏳ 即将开始</button>
     <button class="btn" id="debugToggle" onclick="toggleDebug()" style="background:#222;color:#0f0;border-color:#444;font-family:monospace;font-size:12px;">🐛 调试</button>
+    <button class="btn pyramid-btn" id="btnPyramid" onclick="togglePyramid()">🏆 金字塔</button>
   </div>
 </header>
 
@@ -384,6 +605,10 @@ footer {
 </div>
 
 <div id="content"></div>
+
+<div class="pyramid-wrap" id="pyramidContainer" style="display:none;">
+  <div class="pyramid" id="pyramidRoot"></div>
+</div>
 
 <div class="modal-overlay" id="apiKeyModal">
   <div class="modal">
@@ -1267,6 +1492,181 @@ async function init() {
   await fetchBaiduScores(true);
   render();
   startAutoRefresh();
+}
+
+
+// ===================== PYRAMID / TOURNAMENT BRACKET =====================
+let pyramidVisible = false;
+
+function togglePyramid() {
+  pyramidVisible = !pyramidVisible;
+  const btn = document.getElementById('btnPyramid');
+  const container = document.getElementById('pyramidContainer');
+  const content = document.getElementById('content');
+  const tabs = document.getElementById('stageTabs');
+
+  if (pyramidVisible) {
+    btn.classList.add('active');
+    container.style.display = 'block';
+    content.style.display = 'none';
+    tabs.style.display = 'none';
+    buildPyramid();
+  } else {
+    btn.classList.remove('active');
+    container.style.display = 'none';
+    content.style.display = 'block';
+    tabs.style.display = 'flex';
+    render();
+  }
+}
+
+function buildPyramid() {
+  const root = document.getElementById('pyramidRoot');
+  if (!root) return;
+
+  // Build knockout slots from MATCHES data
+  const kMatches = {};
+  for (let m of MATCHES) {
+    if (m._stage && m._stage !== 'group') {
+      kMatches[m.stage] = kMatches[m.stage] || [];
+      kMatches[m.stage].push(m);
+    }
+  }
+
+  // Group standings (simplified: show all teams per group)
+  const groupTeams = {};
+  for (let m of MATCHES) {
+    if (!m._stage || m._stage !== 'group' || m.home === 'TBD') continue;
+    const g = m.group;
+    if (!groupTeams[g]) groupTeams[g] = new Set();
+    groupTeams[g].add(m.home);
+    groupTeams[g].add(m.away);
+  }
+
+  const flagImg = (code) => {
+    const cc = COUNTRY_CODES[code];
+    if (!cc) return '';
+    return `<img src="https://flagcdn.com/w40/${cc}.png" alt="" loading="lazy" onerror="this.style.display='none'">`;
+  };
+
+  const teamName = (code) => TEAM_NAMES[code] || code;
+
+  const renderMatchSlot = (m, cls = '') => {
+    if (!m || m.home === 'TBD') {
+      return `<div class="p-slot slot-upcoming ${cls}">
+        <div class="p-teams">
+          <div class="p-team"><span class="p-tbd">待定</span></div>
+          <div class="p-vs">V S</div>
+          <div class="p-team"><span class="p-tbd">待定</span></div>
+        </div>
+      </div>`;
+    }
+    const hScore = m.score && m.score.home !== null && m.score.home !== '?' ? m.score.home : '';
+    const aScore = m.score && m.score.away !== null && m.score.away !== '?' ? m.score.away : '';
+    const statusCls = m.status === 'done' ? 'slot-done' : m.status === 'live' ? 'slot-live' : 'slot-upcoming';
+    const mDate = m.date ? m.date.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' }) + ' ' + m.date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
+    return `<div class="p-slot ${statusCls} ${cls}">
+      <div class="p-teams">
+        <div class="p-team">${flagImg(m.home)} ${teamName(m.home)} ${hScore !== '' ? `<span class="p-score">${hScore}</span>` : ''}</div>
+        <div class="p-vs">V S</div>
+        <div class="p-team">${flagImg(m.away)} ${teamName(m.away)} ${aScore !== '' ? `<span class="p-score">${aScore}</span>` : ''}</div>
+      </div>
+      ${mDate ? `<div class="p-date">${mDate}</div>` : ''}
+    </div>`;
+  };
+
+  const stageLabel = (s) => {
+    const labels = {
+      'FINAL': '🏆 决赛',
+      '3RD': '🥉 季军赛',
+      'SF': '半决赛',
+      'QF': '1/4 决赛',
+      'R16': '1/8 决赛',
+      'R32': '1/16 决赛',
+    };
+    return labels[s] || s;
+  };
+
+  const stageOrder = ['FINAL', '3RD', 'SF', 'QF', 'R16', 'R32'];
+
+  let html = '';
+
+  // Champion slot
+  const finalMatches = kMatches['FINAL'] || [];
+  const finalMatch = finalMatches.length > 0 ? finalMatches[0] : null;
+  html += `<div class="p-level">
+    <div class="p-level-label">👑 冠军</div>
+    <div class="p-level-slots">
+      ${finalMatch && finalMatch.status === 'done'
+        ? `<div class="p-slot p-champion slot-done">
+            <div class="p-teams">
+              <div class="p-team">
+                ${finalMatch.score.home > finalMatch.score.away ? flagImg(finalMatch.home) + ' ' + teamName(finalMatch.home) : flagImg(finalMatch.away) + ' ' + teamName(finalMatch.away)}
+              </div>
+            </div>
+           </div>`
+        : `<div class="p-slot p-champion slot-upcoming">
+            <div class="p-teams"><div class="p-team"><span class="p-tbd">❓</span></div></div>
+           </div>`}
+    </div>
+  </div>`;
+
+  // Connectors
+  html += `<div class="p-connectors"><div class="p-connector"></div></div>`;
+
+  // Final + 3rd Place row
+  const fMatch = finalMatch;
+  const tMatches = kMatches['3RD'] || [];
+  const tMatch = tMatches.length > 0 ? tMatches[0] : null;
+  html += `<div class="p-level">
+    <div class="p-level-label">决赛 / 季军</div>
+    <div class="p-level-slots">
+      ${renderMatchSlot(tMatch)}
+      ${renderMatchSlot(fMatch)}
+    </div>
+  </div>`;
+
+  // Knockout levels (SF → R32)
+  for (let stage of stageOrder) {
+    if (stage === 'FINAL' || stage === '3RD') continue;
+    const matches = kMatches[stage] || [];
+    if (matches.length === 0) continue;
+
+    html += `<div class="p-connectors">`;
+    for (let i = 0; i < matches.length; i++) {
+      html += `<div class="p-connector"></div>`;
+    }
+    html += `</div>`;
+
+    html += `<div class="p-level">
+      <div class="p-level-label">${stageLabel(stage)}</div>
+      <div class="p-level-slots">`;
+    for (let m of matches) {
+      html += renderMatchSlot(m);
+    }
+    html += `</div></div>`;
+  }
+
+  // Group stage
+  html += `<div class="p-connectors"><div class="p-connector"></div></div>`;
+  html += `<div class="p-level">
+    <div class="p-level-label">小组赛</div>
+    <div class="p-level-slots" style="flex:1;">`;
+  html += `<div class="p-groups" style="width:100%;">`;
+  for (let g of GROUPS) {
+    const teams = groupTeams[g] ? [...groupTeams[g]] : [];
+    html += `<div class="p-group">
+      <div class="p-group-name">${g} 组</div>
+      <div class="p-group-teams">`;
+    for (let t of teams) {
+      html += `<div class="p-gt">${flagImg(t)} ${teamName(t)}</div>`;
+    }
+    html += `</div></div>`;
+  }
+  html += `</div>`;
+  html += `</div></div>`;
+
+  root.innerHTML = html;
 }
 
 document.addEventListener('DOMContentLoaded', init);
