@@ -486,23 +486,27 @@ footer {
 
 .p-connector-row {
   display: flex;
+  justify-content: center;
   align-items: center;
+  gap: 8px;
   width: 100%;
 }
 .p-connector-row .p-conn-spacer {
   width: 100px;
   min-width: 100px;
+  padding-right: 10px;
   flex-shrink: 0;
 }
 .p-connector-row .p-conn-slots {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex: 1;
   justify-content: center;
 }
 .p-connector-cell {
   min-width: 150px;
   max-width: 190px;
+  padding: 0 14px;
   height: 14px;
   display: flex;
   align-items: center;
@@ -1706,12 +1710,13 @@ function buildPyramid() {
   </div>`;
 
   // Knockout levels (SF → R32)
+  let prevCount = 2; // Final/3rd has 2 slots → connector count starts at 2
   for (let stage of stageOrder) {
     if (stage === 'FINAL' || stage === '3RD') continue;
     const matches = kMatches[stage] || [];
     if (matches.length === 0) continue;
 
-    html += renderConnectorRow(matches.length);
+    html += renderConnectorRow(prevCount);
 
     html += `<div class="p-level">
       <div class="p-level-label">${stageLabel(stage)}</div>
@@ -1720,6 +1725,7 @@ function buildPyramid() {
       html += renderMatchSlot(m);
     }
     html += `</div></div>`;
+    prevCount = matches.length;
   }
 
   // Group stage connector
