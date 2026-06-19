@@ -12,12 +12,21 @@ import json
 import re
 import os
 import datetime
+import time as _time
 from html import unescape
 
 PORT = int(os.environ.get("PORT", 8765))
 BIND = "0.0.0.0" if os.environ.get("RENDER") else "127.0.0.1"
 HTML_DIR = os.path.dirname(os.path.abspath(__file__))
 BAIDU_API = "https://tiyu.baidu.com/api/na/subscribe?subscribeID=69&appKey=NA_matchschedule"
+
+# World Cup start date for historical data scraping
+WC_START = datetime.date(2026, 6, 11)
+
+# Server-side cache: {date_str: [matches], ...}
+_history_cache = {}
+_cache_full_ts = 0.0
+CACHE_TTL = 600  # refresh full history every 10 minutes
 
 class ProxyHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -51,14 +60,40 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
 
             matches = parse_scores(html)
 
-            # Fallback: scrape al/match pages for past 3 days' scores
-            # (subscribe API only returns today/upcoming, misses yesterday)
+            # Merge with historical scores (cached server-side)
             try:
                 today = datetime.date.today()
-                all_page_matches = []
-                for offset in (0, 1, 2):
+                # Always refresh today + yesterday from page (live data)
+                recent = []
+                for offset in (0, 1):
                     date_str = (today - datetime.timedelta(days=offset)).strftime("%Y-%m-%d")
-                    all_page_matches.extend(fetch_page_scores(date_str))
+                    recent.extend(fetch_page_scores(date_str))
+
+                # Full history: fetch all WC dates if cache expired
+                global _history_cache, _cache_full_ts
+                if _time.time() - _cache_full_ts > CACHE_TTL:
+                    print(f"[{datetime.datetime.now():%H:%M:%S}] 刷新完整历史比分缓存...", flush=True)
+                    new_cache = {}
+                    delta = (today - WC_START).days
+                    fetched_dates = 0
+                    for offset in range(delta + 1):
+                        date_str = (today - datetime.timedelta(days=offset)).strftime("%Y-%m-%d")
+                        # Skip today+yesterday (already fetched fresh above)
+                        if offset <= 1:
+                            continue
+                        page_matches = fetch_page_scores(date_str)
+                        if page_matches:
+                            new_cache[date_str] = page_matches
+                            fetched_dates += 1
+                    _history_cache = new_cache
+                    _cache_full_ts = _time.time()
+                    print(f"[{datetime.datetime.now():%H:%M:%S}] 缓存了 {fetched_dates} 天历史数据", flush=True)
+
+                # Collect: recent (fresh) + history cache
+                all_page_matches = list(recent)
+                for date_str, page_matches in _history_cache.items():
+                    all_page_matches.extend(page_matches)
+
                 # Deduplicate page matches by (home, away) key
                 deduped = {}
                 for m in all_page_matches:
