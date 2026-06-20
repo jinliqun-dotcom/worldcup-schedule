@@ -393,6 +393,9 @@ footer {
   position: relative;
 }
 
+/* Match card wrapper (for side-by-side Final/3rd) */
+.b-match-wrap { flex: 1; min-width: 0; }
+
 /* Match card */
 .b-match {
   background: #111827;
@@ -1789,13 +1792,12 @@ function buildBracket() {
   for (var i = 0; i < sf.length; i++) h += renderMatchCard(sf[i]);
   h += '</div>';
 
-  // Col 6: Final + 3rd + Champion
+  // Col 6: 3rd (left) + Final (right), centered
   h += '<div class="b-col">';
-  if (finalMatch) h += renderMatchCard(finalMatch, 'final');
-  h += '<div class="b-space"></div>';
-  if (thirdMatch) h += '<div style="display:flex;justify-content:center;">'+renderMatchCard(thirdMatch)+'</div>';
-  h += '<div class="b-space"></div>';
-  h += championResults();
+  h += '<div style="display:flex;gap:6px;justify-content:center;align-items:center;">';
+  if (thirdMatch) h += '<div class="b-match-wrap">'+renderMatchCard(thirdMatch)+'</div>';
+  if (finalMatch) h += '<div class="b-match-wrap">'+renderMatchCard(finalMatch, 'final')+'</div>';
+  h += '</div>';
   h += '</div>';
 
   // Col 7: Group Standings
