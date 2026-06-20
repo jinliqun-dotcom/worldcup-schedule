@@ -1436,6 +1436,8 @@ function applyBaiduScores(apiMatches) {
 
       // Primary: Chinese name -> code lookup (Baidu returns Chinese)
       const codeMatch = (nameToCode[ah] === m.home && nameToCode[aa] === m.away);
+      // Fallback: reversed home/away (Baidu sometimes swaps order vs schedule)
+      const codeMatchRev = (nameToCode[ah] === m.away && nameToCode[aa] === m.home);
 
       // Fallback: English alias matching
       function matchesAlias(name, aliases) {
@@ -1443,14 +1445,18 @@ function applyBaiduScores(apiMatches) {
         return aliases.some(a => n === a.toLowerCase() || n.includes(a.toLowerCase()) || a.toLowerCase().includes(n));
       }
       const aliasMatch = matchesAlias(ah.toLowerCase(), homeAliases) && matchesAlias(aa.toLowerCase(), awayAliases);
+      const aliasMatchRev = matchesAlias(ah.toLowerCase(), awayAliases) && matchesAlias(aa.toLowerCase(), homeAliases);
 
-      if (codeMatch || aliasMatch) {
+      if (codeMatch || aliasMatch || codeMatchRev || aliasMatchRev) {
+        const reversed = !codeMatch && !aliasMatch && (codeMatchRev || aliasMatchRev);
         // Update status from Baidu
         if (am.status === 'done') m.status = 'done';
         else if (am.status === 'live') m.status = 'live';
-        // Update score if available
+        // Update score if available (swap if reversed)
         if (am.score && am.score.home !== null && am.score.home !== undefined) {
-          m.score = { home: am.score.home, away: am.score.away };
+          m.score = reversed
+            ? { home: am.score.away, away: am.score.home }
+            : { home: am.score.home, away: am.score.away };
           // Persist to localStorage so scores survive page refresh / API gaps
           if (am.status === 'done') {
             saveCachedScore(m.id, m.score);
