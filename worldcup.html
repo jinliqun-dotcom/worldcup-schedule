@@ -602,6 +602,125 @@ footer {
   .b-gt { font-size: 0.9em; }
 }
 
+/* ========== GROUP STANDINGS ========== */
+.standings-wrap {
+  margin: 10px 24px 24px;
+  position: relative;
+  z-index: 1;
+}
+.standings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 14px;
+}
+.s-table {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.s-head {
+  background: linear-gradient(135deg, #1a3a5c, #1e4976);
+  color: #ffd54f;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.s-head .sg-name { font-size: 18px; }
+.s-head .sg-sub { font-size: 11px; opacity: 0.75; font-weight: 400; }
+.s-rows { padding: 4px 0; }
+.s-row {
+  display: grid;
+  grid-template-columns: 24px 30px 1fr 28px 28px 28px 28px 32px 36px;
+  align-items: center;
+  padding: 6px 12px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--border);
+  gap: 2px;
+  transition: background 0.15s;
+}
+.s-row:last-child { border-bottom: none; }
+.s-row:hover { background: var(--card-hover); }
+.s-row.adv { background: rgba(13,122,62,0.06); }
+.s-row.adv:hover { background: rgba(13,122,62,0.12); }
+.sr { text-align: center; color: var(--text-dim); font-weight: 600; font-size: 12px; }
+.sg-flag { width: 22px; height: 15px; object-fit: contain; border-radius: 2px; vertical-align: middle; flex-shrink: 0; }
+.sg-team {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.sg-team span { overflow: hidden; text-overflow: ellipsis; }
+.sc { text-align: center; font-family: 'Consolas','Courier New',monospace; font-size: 13px; }
+.sc.dim { color: var(--text-dim); }
+.s-pts { text-align: center; font-weight: 800; font-size: 15px; color: var(--accent); }
+.s-row.adv .s-pts { color: #0d7a3e; }
+.s-col-hint, .s-col-hint-sm {
+  display: none;
+  font-size: 10px;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 2px 0;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.s-legend {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-dim);
+  padding: 8px 0 16px;
+}
+.s-legend .adv-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: rgba(13,122,62,0.3);
+  margin: 0 4px;
+  vertical-align: middle;
+}
+.s-note {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-dim);
+  padding: 0 20px 16px;
+  line-height: 1.8;
+}
+@media (max-width: 767px) {
+  .standings-wrap { margin: 6px 8px 16px; }
+  .standings-grid { grid-template-columns: 1fr; gap: 8px; }
+  .s-head { padding: 8px 12px; font-size: 13px; }
+  .s-head .sg-name { font-size: 15px; }
+  .s-row {
+    grid-template-columns: 20px 24px 1fr 22px 22px 22px 22px 24px 28px;
+    padding: 5px 8px;
+    font-size: 12px;
+    gap: 1px;
+  }
+  .s-pts { font-size: 13px; }
+  .sc { font-size: 11px; }
+  .s-col-hint { display: block; }
+}
+@media (max-width: 479px) {
+  .s-row {
+    grid-template-columns: 18px 22px 1fr 20px 20px 20px 36px;
+    font-size: 11px;
+    gap: 0;
+  }
+  .s-col-hint-sm { display: block; }
+  /* hide GF/GA columns on tiny screens, show only GD */
+  .s-row .sc:nth-child(6),
+  .s-row .sc:nth-child(7) { display: none; }
+}
+
 </style>
 </head>
 <body>
@@ -638,9 +757,12 @@ footer {
   <button class="tab" onclick="switchStage('qf')">1/4决赛</button>
   <button class="tab" onclick="switchStage('sf')">半决赛</button>
   <button class="tab" onclick="switchStage('final')">决赛</button>
+  <button class="tab standings-tab" onclick="switchStage('standings')">📊 积分榜</button>
 </div>
 
 <div id="content"></div>
+
+<div class="standings-wrap" id="standingsContainer" style="display:none;"></div>
 
 <div class="bracket-wrap" id="bracketContainer" style="display:none;">
   <div class="b-inner" id="bracketRoot"></div>
@@ -1039,6 +1161,14 @@ function isUpcoming(m) {
 
 // ===================== RENDER =====================
 function render() {
+  // Hide standings / bracket when showing match list
+  document.getElementById('standingsContainer').style.display = 'none';
+  document.getElementById('bracketContainer').style.display = 'none';
+  document.getElementById('content').style.display = '';
+  bracketVisible = false;
+  var btnB = document.getElementById('btnBracket');
+  if (btnB) btnB.classList.remove('active');
+
   const container = document.getElementById('content');
   let matches = [...MATCHES];
 
@@ -1479,10 +1609,20 @@ function switchTab(tab) {
 function switchStage(stage) {
   currentStage = stage;
   document.querySelectorAll('#stageTabs .tab').forEach((t, i) => {
-    const stages = ['group','r32','r16','qf','sf','final'];
+    const stages = ['group','r32','r16','qf','sf','final','standings'];
     t.classList.toggle('active', stages[i] === stage);
   });
-  render();
+  if (stage === 'standings') {
+    buildStandings();
+  } else {
+    document.getElementById('standingsContainer').style.display = 'none';
+    document.getElementById('bracketContainer').style.display = 'none';
+    document.getElementById('content').style.display = '';
+    bracketVisible = false;
+    var btnB = document.getElementById('btnBracket');
+    if (btnB) btnB.classList.remove('active');
+    render();
+  }
 }
 
 function updateButtonStates() {
@@ -1570,6 +1710,73 @@ async function init() {
   startAutoRefresh();
 }
 
+
+// ===================== GROUP STANDINGS VIEW =====================
+function buildStandings() {
+  var panel = document.getElementById('standingsContainer');
+  document.getElementById('content').style.display = 'none';
+  document.getElementById('bracketContainer').style.display = 'none';
+  bracketVisible = false;
+  var btnB = document.getElementById('btnBracket');
+  if (btnB) btnB.classList.remove('active');
+  panel.style.display = 'block';
+
+  var standings = computeGroupStandings();
+  var groups = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+  var h = '<div class="standings-grid">';
+
+  for (var i = 0; i < groups.length; i++) {
+    var g = groups[i];
+    var teams = standings[g] || [];
+    var playedAll = teams.length === 4;
+    var totalMP = teams.reduce(function(s, t) { return s + t.mp; }, 0);
+    h += '<div class="s-table">';
+    h += '<div class="s-head"><span class="sg-name">小组 ' + g + ' · Group ' + g + '</span><span class="sg-sub">已赛 ' + (totalMP/2) + '/6 场</span></div>';
+    h += '<div class="s-rows">';
+    // Column hints for mobile
+    h += '<div class="s-col-hint"><span style="display:inline-block;width:24px;">#</span><span style="display:inline-block;width:30px;"></span><span style="display:inline-block;width:1fr;">球队</span><span style="display:inline-block;width:28px;">W</span><span style="display:inline-block;width:28px;">D</span><span style="display:inline-block;width:28px;">L</span><span style="display:inline-block;width:28px;">GD</span><span style="display:inline-block;width:32px;">GF</span><span style="display:inline-block;width:36px;">分</span></div>';
+    h += '<div class="s-col-hint-sm"><span style="display:inline-block;width:18px;">#</span><span style="display:inline-block;width:22px;"></span><span style="display:inline-block;width:1fr;">球队</span><span style="display:inline-block;width:20px;">W</span><span style="display:inline-block;width:20px;">D</span><span style="display:inline-block;width:20px;">L</span><span style="display:inline-block;width:36px;">分</span></div>';
+
+    for (var j = 0; j < 4; j++) {
+      var t = teams[j];
+      var pos = j + 1;
+      var adv = j < 2 ? ' adv' : '';
+      if (t) {
+        var gd = t.gd > 0 ? '+' + t.gd : String(t.gd);
+        h += '<div class="s-row' + adv + '">';
+        h += '<span class="sr">' + pos + '</span>';
+        h += '<span>' + flagImg(t.code) + '</span>';
+        h += '<span class="sg-team"><span>' + tn(t.code) + '</span></span>';
+        h += '<span class="sc">' + t.w + '</span>';
+        h += '<span class="sc dim">' + t.d + '</span>';
+        h += '<span class="sc dim">' + t.l + '</span>';
+        h += '<span class="sc' + (t.gd >= 0 ? '' : ' dim') + '">' + gd + '</span>';
+        h += '<span class="sc dim" style="font-size:11px;">' + t.gf + '</span>';
+        h += '<span class="s-pts">' + t.pts + '</span>';
+        h += '</div>';
+      } else {
+        h += '<div class="s-row">';
+        h += '<span class="sr">' + pos + '</span>';
+        h += '<span></span>';
+        h += '<span class="sg-team" style="color:#aaa;font-weight:400;">待定 · TBD</span>';
+        h += '<span class="sc dim">-</span>';
+        h += '<span class="sc dim">-</span>';
+        h += '<span class="sc dim">-</span>';
+        h += '<span class="sc dim">-</span>';
+        h += '<span class="sc dim">-</span>';
+        h += '<span class="s-pts" style="color:#aaa;">-</span>';
+        h += '</div>';
+      }
+    }
+    h += '</div></div>';
+  }
+
+  h += '</div>';
+  h += '<div class="s-legend"><span class="adv-dot"></span> 浅绿底色 = 晋级区（每组前2名），按积分 → 净胜球 → 进球数排序</div>';
+  h += '<div class="s-note">48队 → 12小组(A-L) → 每组4队 → 前2名 + 8个最佳第3名 → 32强淘汰赛</div>';
+  panel.innerHTML = h;
+  panel.scrollIntoView({ behavior: 'smooth' });
+}
 
 // ===================== TOURNAMENT BRACKET =====================
 var bracketVisible = false;
@@ -1831,13 +2038,24 @@ function togglePyramid() {
   if (!panel || !btn) return;
   bracketVisible = !bracketVisible;
   if (bracketVisible) {
+    // Hide standings and match content
+    document.getElementById('standingsContainer').style.display = 'none';
+    document.getElementById('content').style.display = 'none';
+    // Reset stage tabs
+    currentStage = 'group';
+    document.querySelectorAll('#stageTabs .tab').forEach(function(t, i) {
+      var stages = ['group','r32','r16','qf','sf','final','standings'];
+      t.classList.toggle('active', stages[i] === 'group');
+    });
     panel.style.display = 'block';
     buildBracket();
     btn.classList.add('active');
     panel.scrollIntoView({ behavior: 'smooth' });
   } else {
     panel.style.display = 'none';
+    document.getElementById('content').style.display = '';
     btn.classList.remove('active');
+    render();
   }
 }
 
