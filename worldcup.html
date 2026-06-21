@@ -363,7 +363,7 @@ footer {
 /* Round labels */
 .b-round-labels {
   display: grid;
-  grid-template-columns: 0.55fr 0.55fr 0.5fr 0.38fr 0.32fr 0.28fr 0.55fr;
+  grid-template-columns: 0.55fr 0.55fr 0.55fr 0.5fr 0.38fr 0.32fr 0.28fr;
   gap: 0;
   margin-bottom: 6px;
   padding: 0 0 0 4px;
@@ -383,7 +383,7 @@ footer {
 /* Bracket grid */
 .b-grid {
   display: grid;
-  grid-template-columns: 0.55fr 0.55fr 0.5fr 0.38fr 0.32fr 0.28fr 0.55fr;
+  grid-template-columns: 0.55fr 0.55fr 0.55fr 0.5fr 0.38fr 0.32fr 0.28fr;
   gap: 0;
 }
 .b-col {
@@ -1966,56 +1966,56 @@ function buildBracket() {
   var h = '';
   // Round labels
   h += '<div class="b-round-labels">';
+  h += '<div class="b-rl hl">小组赛 · Groups</div>';
   h += '<div class="b-rl hl">1/16决赛 · R32</div>';
   h += '<div class="b-rl hl">1/16决赛 · R32</div>';
   h += '<div class="b-rl hl">1/8决赛 · R16</div>';
   h += '<div class="b-rl hl">1/4决赛 · QF</div>';
   h += '<div class="b-rl hl">半决赛 · SF</div>';
   h += '<div class="b-rl hl">决赛 · Final</div>';
-  h += '<div class="b-rl">小组赛 · Groups</div>';
   h += '</div>';
 
   // Bracket grid
   h += '<div class="b-grid">';
 
-  // Col 1: R32 Upper Half
+  // Col 1: Group Standings (moved to far left)
+  h += '<div class="b-col">';
+  h += renderGroupColumn(standings);
+  h += '</div>';
+
+  // Col 2: R32 Upper Half
   h += '<div class="b-col">';
   h += '<div class="b-sec first">上半区 · Upper</div>';
   for (var i = 0; i < r32Upper.length; i++) h += renderMatchCard(r32Upper[i]);
   h += '</div>';
 
-  // Col 2: R32 Lower Half
+  // Col 3: R32 Lower Half
   h += '<div class="b-col">';
   h += '<div class="b-sec first">下半区 · Lower</div>';
   for (var i = 0; i < r32Lower.length; i++) h += renderMatchCard(r32Lower[i]);
   h += '</div>';
 
-  // Col 3: R16
+  // Col 4: R16
   h += '<div class="b-col">';
   for (var i = 0; i < r16.length; i++) h += renderMatchCard(r16[i]);
   h += '</div>';
 
-  // Col 4: QF
+  // Col 5: QF
   h += '<div class="b-col">';
   for (var i = 0; i < qf.length; i++) h += renderMatchCard(qf[i]);
   h += '</div>';
 
-  // Col 5: SF
+  // Col 6: SF
   h += '<div class="b-col">';
   for (var i = 0; i < sf.length; i++) h += renderMatchCard(sf[i]);
   h += '</div>';
 
-  // Col 6: 3rd (left) + Final (right), centered
+  // Col 7: 3rd (left) + Final (right), centered
   h += '<div class="b-col">';
   h += '<div style="display:flex;gap:6px;justify-content:center;align-items:center;">';
   if (thirdMatch) h += '<div class="b-match-wrap">'+renderMatchCard(thirdMatch)+'</div>';
   if (finalMatch) h += '<div class="b-match-wrap">'+renderMatchCard(finalMatch, 'final')+'</div>';
   h += '</div>';
-  h += '</div>';
-
-  // Col 7: Group Standings
-  h += '<div class="b-col">';
-  h += renderGroupColumn(standings);
   h += '</div>';
 
   h += '</div>'; // b-grid
