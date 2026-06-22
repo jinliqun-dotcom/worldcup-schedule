@@ -915,6 +915,16 @@ function getReplayUrl(m) {
   return `https://search.cctv.com/search.php?qtext=${encodeURIComponent('世界杯 ' + homeZh + ' ' + awayZh)}&type=video`;
 }
 
+function getYoutubeReplayUrl(m) {
+  if (m.replayUrl) return m.replayUrl;
+  const homeEn = m.home || '';
+  const awayEn = m.away || '';
+  const homeZh = TEAM_NAMES[m.home] || homeEn;
+  const awayZh = TEAM_NAMES[m.away] || awayEn;
+  const q = encodeURIComponent('2026 FIFA World Cup ' + homeEn + ' vs ' + awayEn + ' ' + homeZh + ' ' + awayZh + ' highlights');
+  return 'https://www.youtube.com/results?search_query=' + q;
+}
+
 // 竞彩销售时间规则
 function getBettingWindow(matchDateBJ) {
   // matchDateBJ: Date object in Beijing time
@@ -1255,7 +1265,7 @@ function render() {
         infoHtml = `<div class="info">
           <span class="group">${m.group ? 'G' + m.group : m._stage}</span>
           <div class="time" style="color:var(--text-dim)">${fmtTime(m.date)}</div>
-          <div class="venue">已结束 · <a href="${getReplayUrl(m)}" target="_blank" rel="noopener" style="color:var(--accent2);text-decoration:none;">🎬 回放</a></div>
+          <div class="venue">已结束 · <a href="${getReplayUrl(m)}" target="_blank" rel="noopener" style="color:var(--accent2);text-decoration:none;">🎬 回放</a> · <a href="${getYoutubeReplayUrl(m)}" target="_blank" rel="noopener" style="color:var(--accent2);text-decoration:none;">▶️ YouTube</a></div>
         </div>`;
       } else {
         infoHtml = `<div class="info">
