@@ -1182,19 +1182,21 @@ function render() {
   const container = document.getElementById('content');
   let matches = [...MATCHES];
 
-  // Filter by stage
-  if (currentStage === 'group') {
-    matches = matches.filter(m => m._stage === 'group');
-  } else if (currentStage === 'r32') {
-    matches = matches.filter(m => m._stage === 'R32');
-  } else if (currentStage === 'r16') {
-    matches = matches.filter(m => m._stage === 'R16');
-  } else if (currentStage === 'qf') {
-    matches = matches.filter(m => m._stage === 'QF');
-  } else if (currentStage === 'sf') {
-    matches = matches.filter(m => m._stage === 'SF' || m._stage === '3RD');
-  } else if (currentStage === 'final') {
-    matches = matches.filter(m => m._stage === 'FINAL');
+  // Filter by stage (all 标签下不过滤)
+  if (currentTab !== 'all') {
+    if (currentStage === 'group') {
+      matches = matches.filter(m => m._stage === 'group');
+    } else if (currentStage === 'r32') {
+      matches = matches.filter(m => m._stage === 'R32');
+    } else if (currentStage === 'r16') {
+      matches = matches.filter(m => m._stage === 'R16');
+    } else if (currentStage === 'qf') {
+      matches = matches.filter(m => m._stage === 'QF');
+    } else if (currentStage === 'sf') {
+      matches = matches.filter(m => m._stage === 'SF' || m._stage === '3RD');
+    } else if (currentStage === 'final') {
+      matches = matches.filter(m => m._stage === 'FINAL');
+    }
   }
 
   // Filter by tab
@@ -2074,3 +2076,4 @@ document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
+
