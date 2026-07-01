@@ -1073,8 +1073,8 @@ const RAW_MATCHES = [
   // === ROUND OF 32 (16 matches) - June 29 · July 4 ===
   {id:'R32-01', stage:'R32', home:'RSA', away:'CAN', dateBJ:'2026-06-29T03:00:00+08:00', venue:'Los Angeles Stadium, Los Angeles', status:'upcoming', score:{home:null,away:null}},
   {id:'R32-02', stage:'R32', home:'BRA', away:'JPN', dateBJ:'2026-06-30T01:00:00+08:00', venue:'Houston Stadium, Houston', status:'done', score:{home:2,away:1}},
-  {id:'R32-03', stage:'R32', home:'GER', away:'PAR', dateBJ:'2026-06-30T04:30:00+08:00', venue:'Boston Stadium, Boston', status:'done', score:{home:1,away:1}},
-  {id:'R32-04', stage:'R32', home:'NED', away:'MAR', dateBJ:'2026-06-30T09:00:00+08:00', venue:'Monterrey Stadium, Monterrey', status:'done', score:{home:1,away:1}},
+  {id:'R32-03', stage:'R32', home:'GER', away:'PAR', dateBJ:'2026-06-30T04:30:00+08:00', venue:'Boston Stadium, Boston', status:'done', score:{home:1,away:1,homePen:3,awayPen:4}},
+  {id:'R32-04', stage:'R32', home:'NED', away:'MAR', dateBJ:'2026-06-30T09:00:00+08:00', venue:'Monterrey Stadium, Monterrey', status:'done', score:{home:1,away:1,homePen:2,awayPen:3}},
   {id:'R32-05', stage:'R32', home:'CIV', away:'NOR', dateBJ:'2026-07-01T01:00:00+08:00', venue:'Dallas Stadium, Dallas', status:'done', score:{home:1,away:2}},
   {id:'R32-06', stage:'R32', home:'FRA', away:'SWE', dateBJ:'2026-07-01T05:00:00+08:00', venue:'New York New Jersey Stadium, New York/New Jersey', status:'done', score:{home:3,away:0}},
   {id:'R32-07', stage:'R32', home:'MEX', away:'ECU', dateBJ:'2026-07-01T10:00:00+08:00', venue:'Mexico City Stadium, Mexico City', status:'live', score:{home:1,away:0}},
@@ -1304,8 +1304,12 @@ function render() {
 
       let scoreHtml = '';
       if (done || live) {
+        const homeScore = m.score.home ?? '-';
+        const awayScore = m.score.away ?? '-';
+        const penHome = m.score.homePen != null ? `(${m.score.homePen})` : '';
+        const penAway = m.score.awayPen != null ? `(${m.score.awayPen})` : '';
         scoreHtml = `<div class="score">
-          ${live ? '<span class="live-dot"></span>' : ''}${m.score.home ?? '-'} : ${m.score.away ?? '-'}
+          ${live ? '<span class="live-dot"></span>' : ''}${homeScore}${penHome} : ${awayScore}${penAway}
           ${live ? '<span class="minute">LIVE</span>' : ''}
         </div>`;
       } else {
@@ -1924,6 +1928,10 @@ function renderMatchCard(m, clsName) {
   }
   var hs = (m.status === 'done' && m.score) ? m.score.home : (m.status === 'live' && m.score ? m.score.home : '-');
   var as = (m.status === 'done' && m.score) ? m.score.away : (m.status === 'live' && m.score ? m.score.away : '-');
+  if (m.status === 'done' && m.score) {
+    if (m.score.homePen != null) hs = '' + m.score.home + '(' + m.score.homePen + ')';
+    if (m.score.awayPen != null) as = '' + m.score.away + '(' + m.score.awayPen + ')';
+  }
   var hw = m.status === 'done' && m.score && parseInt(m.score.home) > parseInt(m.score.away) ? ' win' : '';
   var aw = m.status === 'done' && m.score && parseInt(m.score.away) > parseInt(m.score.home) ? ' win' : '';
 
