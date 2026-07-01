@@ -902,7 +902,7 @@ function venueName(city) {
 // 直播/回放链接
 // 每个比赛对应央视频/百度体育直播页（基于baidu matchId）
 const STREAM_URLS = {
-  'R32-01': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDYtMjkjRTF2c0My',
+  'R32-01': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDYtMjkjQTJ2c0Iy',
   'R32-02': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDYtMzAjQzF2c0Yy',
   'R32-03': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDYtMzAjRTF2c0EzL0IzL0MzL0QzL0Yz',
   'R32-04': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDYtMzAjRjF2c0My',
@@ -1071,13 +1071,13 @@ const RAW_MATCHES = [
   {id:'L6', group:'L', home:'ENG', away:'PAN', dateBJ:'2026-06-28T05:00:00+08:00', venue:'New York New Jersey Stadium, New York/New Jersey', status:'done', score:{home:2,away:0}},
 
   // === ROUND OF 32 (16 matches) - June 29 · July 4 ===
-  {id:'R32-01', stage:'R32', home:'RSA', away:'CAN', dateBJ:'2026-06-29T03:00:00+08:00', venue:'Los Angeles Stadium, Los Angeles', status:'upcoming', score:{home:null,away:null}},
+  {id:'R32-01', stage:'R32', home:'RSA', away:'CAN', dateBJ:'2026-06-29T03:00:00+08:00', venue:'Los Angeles Stadium, Los Angeles', status:'done', score:{home:0,away:1}},
   {id:'R32-02', stage:'R32', home:'BRA', away:'JPN', dateBJ:'2026-06-30T01:00:00+08:00', venue:'Houston Stadium, Houston', status:'done', score:{home:2,away:1}},
   {id:'R32-03', stage:'R32', home:'GER', away:'PAR', dateBJ:'2026-06-30T04:30:00+08:00', venue:'Boston Stadium, Boston', status:'done', score:{home:1,away:1,homePen:3,awayPen:4}},
   {id:'R32-04', stage:'R32', home:'NED', away:'MAR', dateBJ:'2026-06-30T09:00:00+08:00', venue:'Monterrey Stadium, Monterrey', status:'done', score:{home:1,away:1,homePen:2,awayPen:3}},
   {id:'R32-05', stage:'R32', home:'CIV', away:'NOR', dateBJ:'2026-07-01T01:00:00+08:00', venue:'Dallas Stadium, Dallas', status:'done', score:{home:1,away:2}},
   {id:'R32-06', stage:'R32', home:'FRA', away:'SWE', dateBJ:'2026-07-01T05:00:00+08:00', venue:'New York New Jersey Stadium, New York/New Jersey', status:'done', score:{home:3,away:0}},
-  {id:'R32-07', stage:'R32', home:'MEX', away:'ECU', dateBJ:'2026-07-01T10:00:00+08:00', venue:'Mexico City Stadium, Mexico City', status:'live', score:{home:1,away:0}},
+  {id:'R32-07', stage:'R32', home:'MEX', away:'ECU', dateBJ:'2026-07-01T10:00:00+08:00', venue:'Mexico City Stadium, Mexico City', status:'done', score:{home:2,away:0}},
   {id:'R32-08', stage:'R32', home:'ENG', away:'COD', dateBJ:'2026-07-02T00:00:00+08:00', venue:'Atlanta Stadium, Atlanta', status:'upcoming', score:{home:null,away:null}},
   {id:'R32-09', stage:'R32', home:'BEL', away:'SEN', dateBJ:'2026-07-02T04:00:00+08:00', venue:'Seattle Stadium, Seattle', status:'upcoming', score:{home:null,away:null}},
   {id:'R32-10', stage:'R32', home:'USA', away:'BIH', dateBJ:'2026-07-02T08:00:00+08:00', venue:'San Francisco Bay Area Stadium, San Francisco Bay Area', status:'upcoming', score:{home:null,away:null}},
@@ -1865,12 +1865,24 @@ function computeGroupStandings() {
       groups[g][m.home].mp++; groups[g][m.away].mp++;
       groups[g][m.home].gf += hs; groups[g][m.home].ga += as;
       groups[g][m.away].gf += as; groups[g][m.away].ga += hs;
+      var isPenDraw = (m.score.homePen != null && m.score.awayPen != null);
       if (hs > as) {
         groups[g][m.home].w++; groups[g][m.home].pts += 3;
         groups[g][m.away].l++;
       } else if (hs < as) {
         groups[g][m.away].w++; groups[g][m.away].pts += 3;
         groups[g][m.home].l++;
+      } else if (isPenDraw) {
+        // Penalty shootout draw: both get 1 pt for draw, pen winner gets 2 bonus pts
+        groups[g][m.home].d++; groups[g][m.away].d++;
+        groups[g][m.home].pts += 1; groups[g][m.away].pts += 1;
+        if (m.score.homePen > m.score.awayPen) {
+          groups[g][m.home].w++; groups[g][m.home].pts += 2;
+          groups[g][m.away].l++;
+        } else {
+          groups[g][m.away].w++; groups[g][m.away].pts += 2;
+          groups[g][m.home].l++;
+        }
       } else {
         groups[g][m.home].d++; groups[g][m.away].d++;
         groups[g][m.home].pts++; groups[g][m.away].pts++;
