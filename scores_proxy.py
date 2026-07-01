@@ -182,12 +182,20 @@ def parse_scores(html):
 
             home_name = names[0].strip()
             away_name = names[1].strip()
-            home_score = scores[0].strip()
-            away_score = scores[1].strip()
+            home_score_raw = scores[0].strip()
+            away_score_raw = scores[1].strip()
 
+            # Parse penalty scores: "2", "1[3]", "[4]" etc.
             score_data = None
-            if home_score.isdigit() and away_score.isdigit():
-                score_data = {"home": int(home_score), "away": int(away_score)}
+            homePen = None
+            awayPen = None
+            hm = re.match(r'^(\d+)(?:\[(\d+)\])?$', home_score_raw)
+            am = re.match(r'^(\d+)(?:\[(\d+)\])?$', away_score_raw)
+            if hm and am:
+                score_data = {"home": int(hm.group(1)), "away": int(am.group(1))}
+                if hm.group(2) or am.group(2):
+                    score_data["homePen"] = int(hm.group(2) or 0)
+                    score_data["awayPen"] = int(am.group(2) or 0)
 
             matches.append({
                 "home": home_name,
@@ -223,23 +231,30 @@ def fetch_page_scores(date_str):
 
     # Match completed matches: HH:MM round_text team1 score1 team2 score2 已结束
     # Also match: HH:MM round_text team1 - team2 - 未开赛 (to avoid false matches)
-    patterns = [
-        # Done: 03:00 小组赛B组第1轮 加拿大 1 波黑 1 已结束
-        re.compile(r'(\d{2}:\d{2})\s+(.+?)\s+(\S+)\s+(\d+)\s+(\S+)\s+(\d+)\s+已结束'),
-        # Alternative: no space between round and team: 03:00小组赛B组第1轮加拿大1波黑1已结束
-        re.compile(r'(\d{2}:\d{2})[\s]*([^0-9]+?)[\s]*(\S+)[\s]+(\d+)[\s]+(\S+)[\s]+(\d+)[\s]+已结束'),
-    ]
+    # Match done: time round team score [pen] team score [pen] 已结束
+    # e.g. 德国 1 [3] 巴拉圭 1 [4] 已结束
+    pat_main = re.compile(
+        r'(\d{2}:\d{2})\s+'   # time
+        r'([^0-9]+?)\s+'       # round text
+        r'(\S+?)\s+'           # home team
+        r'(\d+)\s*(?:\[(\d+)\])?'  # home score + optional [pen]
+        r'\s+'
+        r'(\S+?)\s+'           # away team
+        r'(\d+)\s*(?:\[(\d+)\])?'  # away score + optional [pen]
+        r'\s+已结束'
+    )
 
     results = []
     seen = set()
-    for pat in patterns:
-        for m in pat.finditer(text):
-            match_time = m.group(1)
-            round_text = m.group(2).strip()
-            home_name = m.group(3).strip()
-            home_score = m.group(4)
-            away_name = m.group(5).strip()
-            away_score = m.group(6)
+    for m in pat_main.finditer(text):
+        match_time = m.group(1)
+        round_text = m.group(2).strip()
+        home_name = m.group(3).strip()
+        home_score = m.group(4)
+        home_pen = m.group(5)  # may be None
+        away_name = m.group(6).strip()
+        away_score = m.group(7)
+        away_pen = m.group(8)  # may be None
 
             key = (home_name, away_name, home_score, away_score)
             if key in seen:
@@ -250,10 +265,14 @@ def fetch_page_scores(date_str):
             if "小组赛" not in round_text and "世界杯" not in round_text.lower():
                 continue
 
+            sd = {"home": int(home_score), "away": int(away_score)}
+            if home_pen or away_pen:
+                sd["homePen"] = int(home_pen) if home_pen else 0
+                sd["awayPen"] = int(away_pen) if away_pen else 0
             results.append({
                 "home": home_name,
                 "away": away_name,
-                "score": {"home": int(home_score), "away": int(away_score)},
+                "score": sd,
                 "status": "done",
                 "round": round_text,
                 "time": match_time
