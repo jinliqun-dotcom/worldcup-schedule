@@ -180,6 +180,10 @@ def parse_scores(html):
             elif "取消" in status_text or "推迟" in status_text or "中止" in status_text:
                 continue
 
+            # Skip non-World-Cup matches (filter by round text)
+            if not ("决赛" in round_text or "小组" in round_text):
+                continue
+
             home_name = names[0].strip()
             away_name = names[1].strip()
             home_score_raw = scores[0].strip()
@@ -256,22 +260,22 @@ def fetch_page_scores(date_str):
         away_score = m.group(7)
         away_pen = m.group(8)  # may be None
 
-            key = (home_name, away_name, home_score, away_score)
-            if key in seen:
-                continue
-            seen.add(key)
+        key = (home_name, away_name, home_score, away_score)
+        if key in seen:
+            continue
+        seen.add(key)
 
-            # Only World Cup matches
-            if "小组赛" not in round_text and "世界杯" not in round_text.lower():
-                continue
+        # Only World Cup matches
+        if "小组赛" not in round_text and "世界杯" not in round_text.lower():
+            continue
 
-            sd = {"home": int(home_score), "away": int(away_score)}
-            if home_pen or away_pen:
-                sd["homePen"] = int(home_pen) if home_pen else 0
-                sd["awayPen"] = int(away_pen) if away_pen else 0
-            results.append({
-                "home": home_name,
-                "away": away_name,
+        sd = {"home": int(home_score), "away": int(away_score)}
+        if home_pen or away_pen:
+            sd["homePen"] = int(home_pen) if home_pen else 0
+            sd["awayPen"] = int(away_pen) if away_pen else 0
+        results.append({
+            "home": home_name,
+            "away": away_name,
                 "score": sd,
                 "status": "done",
                 "round": round_text,
