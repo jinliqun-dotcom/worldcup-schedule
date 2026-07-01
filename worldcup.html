@@ -900,13 +900,41 @@ function venueName(city) {
 }
 
 // 直播/回放链接
+// 每个比赛对应央视频/百度体育直播页（基于baidu matchId）
+const STREAM_URLS = {
+  'R32-01': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDYtMjkjRTF2c0My',
+  'R32-02': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDYtMzAjQzF2c0Yy',
+  'R32-03': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDYtMzAjRTF2c0EzL0IzL0MzL0QzL0Yz',
+  'R32-04': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDYtMzAjRjF2c0My',
+  'R32-05': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMDEjRTJ2c0ky',
+  'R32-06': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMDEjSTF2c0MzL0QzL0YzL0czL0gz',
+  'R32-07': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMDEjQTF2c0MzL0UzL0YzL0gzL0kz',
+  'R32-08': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMDIjTDF2c0UzL0gzL0kzL0ozL0sz',
+  'R32-09': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMDIjRzF2c0EzL0UzL0gzL0kzL0oz',
+  'R32-10': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMDIjRDF2c0IzL0UzL0YzL0kzL0oz',
+  'R32-11': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMDMjSDF2c0oy',
+  'R32-12': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMDMjSzJ2c0wy',
+  'R32-13': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMDMjQjF2c0UzL0YzL0czL0kzL0oz',
+  'R32-14': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMDQjRDJ2c0cy',
+  'R32-15': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMDQjSjF2c0gy',
+  'R32-16': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMDQjSzF2c0QzL0UzL0kzL0ozL0wz',
+  'R16-1': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMDUj56ysMeWcujEvMTblhrPotZvog5zogIV2c+esrDPlnLoxLzE25Yaz6LWb6IOc6ICF',
+  'R16-2': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMDUj56ysMuWcujEvMTblhrPotZvog5zogIV2c+esrDXlnLoxLzE25Yaz6LWb6IOc6ICF',
+  'R16-3': 'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMDYj56ysNOWcujEvMTblhrPotZvog5zogIV2c+esrDblnLoxLzE25Yaz6LWb6IOc6ICF',
+  'QF-1':  'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMTAj56ysMeWcujEvOOWGs+i1m+iDnOiAhXZz56ysMuWcujEvOOWGs+i1m+iDnOiAhQ%3D%3D',
+  'QF-2':  'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMTEj56ysNeWcujEvOOWGs+i1m+iDnOiAhXZz56ysNuWcujEvOOWGs+i1m+iDnOiAhQ%3D%3D',
+  'QF-3':  'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMTIj56ysM+WcujEvOOWGs+i1m+iDnOiAhXZz56ysNOWcujEvOOWGs+i1m+iDnOiAhQ%3D%3D',
+  'QF-4':  'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMTIj56ysN+WcujEvOOWGs+i1m+iDnOiAhXZz56ysOOWcujEvOOWGs+i1m+iDnOiAhQ%3D%3D',
+  'SF-1':  'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMTUj56ysMeWcujEvNOWGs+i1m+iDnOiAhXZz56ysMuWcujEvNOWGs+i1m+iDnOiAhQ%3D%3D',
+  'SF-2':  'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMTYj56ysM+WcujEvNOWGs+i1m+iDnOiAhXZz56ysNOWcujEvNOWGs+i1m+iDnOiAhQ%3D%3D',
+  '3RD':    'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMTkj56ysMeWcuuWNiuWGs+i1m+i0peiAhXZz56ysMuWcuuWNiuWGs+i1m+i0peiAhQ%3D%3D',
+  'FINAL':  'https://www.yangshipin.cn/#/video?matchId=5LiW55WM5p2vIzIwMjYtMDctMjAj56ysMeWcuuWNiuWGs+i1m+iDnOiAhXZz56ysMuWcuuWNiuWGs+i1m+iDnOiAhQ%3D%3D',
+};
+
 function getStreamUrl(m) {
-  // Custom URL per match
   if (m.streamUrl) return m.streamUrl;
-  // Default: CCTV5 live (main World Cup broadcaster in China)
-  const homeZh = TEAM_NAMES[m.home] || m.home;
-  const awayZh = TEAM_NAMES[m.away] || m.away;
-  return `https://tv.cctv.com/live/cctv5/`;
+  if (STREAM_URLS[m.id]) return STREAM_URLS[m.id];
+  return 'https://www.yangshipin.cn/#/search?keyword=世界杯';
 }
 function getReplayUrl(m) {
   if (m.replayUrl) return m.replayUrl;
@@ -1044,12 +1072,21 @@ const RAW_MATCHES = [
 
   // === ROUND OF 32 (16 matches) - June 29 · July 4 ===
   {id:'R32-01', stage:'R32', home:'RSA', away:'CAN', dateBJ:'2026-06-29T03:00:00+08:00', venue:'Los Angeles Stadium, Los Angeles', status:'upcoming', score:{home:null,away:null}},
-  {id:'R32-02', stage:'R32', home:'BRA', away:'JPN', dateBJ:'2026-06-30T01:00:00+08:00', venue:'Houston Stadium, Houston', status:'upcoming', score:{home:null,away:null}},
-  {id:'R32-03', stage:'R32', home:'GER', away:'PAR', dateBJ:'2026-06-30T04:30:00+08:00', venue:'Boston Stadium, Boston', status:'upcoming', score:{home:null,away:null}},
-  {id:'R32-04', stage:'R32', home:'NED', away:'MAR', dateBJ:'2026-06-30T09:00:00+08:00', venue:'Monterrey Stadium, Monterrey', status:'upcoming', score:{home:null,away:null}},
-  {id:'R32-05', stage:'R32', home:'CIV', away:'NOR', dateBJ:'2026-07-01T01:00:00+08:00', venue:'Dallas Stadium, Dallas', status:'upcoming', score:{home:null,away:null}},
-  {id:'R32-06', stage:'R32', home:'FRA', away:'SWE', dateBJ:'2026-07-01T05:00:00+08:00', venue:'New York New Jersey Stadium, New York/New Jersey', status:'upcoming', score:{home:null,away:null}},
-  {id:'R32-07', stage:'R32', home:'MEX', away:'ECU', dateBJ:'2026-07-01T09:00:00+08:00', venue:'Mexico City Stadium, Mexico City', status:'upcoming', score:{home:null,away:null}},
+  {id:'R32-02', stage:'R32', home:'BRA', away:'JPN', dateBJ:'2026-06-30T01:00:00+08:00', venue:'Houston Stadium, Houston', status:'done', score:{home:2,away:1}},
+  {id:'R32-03', stage:'R32', home:'GER', away:'PAR', dateBJ:'2026-06-30T04:30:00+08:00', venue:'Boston Stadium, Boston', status:'done', score:{home:1,away:1}},
+  {id:'R32-04', stage:'R32', home:'NED', away:'MAR', dateBJ:'2026-06-30T09:00:00+08:00', venue:'Monterrey Stadium, Monterrey', status:'done', score:{home:1,away:1}},
+  {id:'R32-05', stage:'R32', home:'CIV', away:'NOR', dateBJ:'2026-07-01T01:00:00+08:00', venue:'Dallas Stadium, Dallas', status:'done', score:{home:1,away:2}},
+  {id:'R32-06', stage:'R32', home:'FRA', away:'SWE', dateBJ:'2026-07-01T05:00:00+08:00', venue:'New York New Jersey Stadium, New York/New Jersey', status:'done', score:{home:3,away:0}},
+  {id:'R32-07', stage:'R32', home:'MEX', away:'ECU', dateBJ:'2026-07-01T10:00:00+08:00', venue:'Mexico City Stadium, Mexico City', status:'live', score:{home:1,away:0}},
+  {id:'R32-08', stage:'R32', home:'ENG', away:'COD', dateBJ:'2026-07-02T00:00:00+08:00', venue:'Atlanta Stadium, Atlanta', status:'upcoming', score:{home:null,away:null}},
+  {id:'R32-09', stage:'R32', home:'BEL', away:'SEN', dateBJ:'2026-07-02T04:00:00+08:00', venue:'Seattle Stadium, Seattle', status:'upcoming', score:{home:null,away:null}},
+  {id:'R32-10', stage:'R32', home:'USA', away:'BIH', dateBJ:'2026-07-02T08:00:00+08:00', venue:'San Francisco Bay Area Stadium, San Francisco Bay Area', status:'upcoming', score:{home:null,away:null}},
+  {id:'R32-11', stage:'R32', home:'ESP', away:'AUT', dateBJ:'2026-07-03T03:00:00+08:00', venue:'Los Angeles Stadium, Los Angeles', status:'upcoming', score:{home:null,away:null}},
+  {id:'R32-12', stage:'R32', home:'POR', away:'CRO', dateBJ:'2026-07-03T07:00:00+08:00', venue:'Toronto Stadium, Toronto', status:'upcoming', score:{home:null,away:null}},
+  {id:'R32-13', stage:'R32', home:'SUI', away:'ALG', dateBJ:'2026-07-03T11:00:00+08:00', venue:'BC Place Vancouver, Vancouver', status:'upcoming', score:{home:null,away:null}},
+  {id:'R32-14', stage:'R32', home:'AUS', away:'EGY', dateBJ:'2026-07-04T02:00:00+08:00', venue:'Dallas Stadium, Dallas', status:'upcoming', score:{home:null,away:null}},
+  {id:'R32-15', stage:'R32', home:'ARG', away:'CPV', dateBJ:'2026-07-04T06:00:00+08:00', venue:'Miami Stadium, Miami', status:'upcoming', score:{home:null,away:null}},
+  {id:'R32-16', stage:'R32', home:'COL', away:'GHA', dateBJ:'2026-07-04T09:30:00+08:00', venue:'Kansas City Stadium, Kansas City', status:'upcoming', score:{home:null,away:null}},
   {id:'R32-08', stage:'R32', home:'ENG', away:'COD', dateBJ:'2026-07-02T00:00:00+08:00', venue:'Atlanta Stadium, Atlanta', status:'upcoming', score:{home:null,away:null}},
   {id:'R32-09', stage:'R32', home:'BEL', away:'SEN', dateBJ:'2026-07-02T04:00:00+08:00', venue:'Seattle Stadium, Seattle', status:'upcoming', score:{home:null,away:null}},
   {id:'R32-10', stage:'R32', home:'USA', away:'BIH', dateBJ:'2026-07-02T08:00:00+08:00', venue:'San Francisco Bay Area Stadium, San Francisco Bay Area', status:'upcoming', score:{home:null,away:null}},
@@ -1060,30 +1097,43 @@ const RAW_MATCHES = [
   {id:'R32-15', stage:'R32', home:'ARG', away:'CPV', dateBJ:'2026-07-04T06:00:00+08:00', venue:'Miami Stadium, Miami', status:'upcoming', score:{home:null,away:null}},
   {id:'R32-16', stage:'R32', home:'COL', away:'GHA', dateBJ:'2026-07-04T09:30:00+08:00', venue:'Kansas City Stadium, Kansas City', status:'upcoming', score:{home:null,away:null}},
 
-  // === ROUND OF 16 (8 matches) - July 5 · July 8 ===
-  {id:'R16-1', stage:'R16', home:'TBD', away:'TBD', dateBJ:'2026-07-05T01:00:00+08:00', venue:'Houston Stadium, Houston', status:'upcoming', score:{home:null,away:null}},
-  {id:'R16-2', stage:'R16', home:'TBD', away:'TBD', dateBJ:'2026-07-05T05:00:00+08:00', venue:'Philadelphia Stadium, Philadelphia', status:'upcoming', score:{home:null,away:null}},
-  {id:'R16-3', stage:'R16', home:'TBD', away:'TBD', dateBJ:'2026-07-06T04:00:00+08:00', venue:'New York New Jersey Stadium, New York/New Jersey', status:'upcoming', score:{home:null,away:null}},
-  {id:'R16-4', stage:'R16', home:'TBD', away:'TBD', dateBJ:'2026-07-06T08:00:00+08:00', venue:'Mexico City Stadium, Mexico City', status:'upcoming', score:{home:null,away:null}},
+  // === ROUND OF 16 (8 matches) — Jul 5-8 ===
+  // R16 bracket from Baidu (QFs confirmed by Baidu matchIds):
+  // QF1=PAR/FRA winner vs CAN/MAR winner → R16-1 winner vs R16-2 winner
+  // QF3=BRA/NOR winner vs R16-4 winner → R16-3 winner vs R16-4 winner
+  {id:'R16-1', stage:'R16', home:'CAN', away:'MAR', dateBJ:'2026-07-05T01:00:00+08:00', venue:'Houston Stadium, Houston', status:'upcoming', score:{home:null,away:null}},
+  {id:'R16-2', stage:'R16', home:'PAR', away:'FRA', dateBJ:'2026-07-05T05:00:00+08:00', venue:'Philadelphia Stadium, Philadelphia', status:'upcoming', score:{home:null,away:null}},
+  {id:'R16-3', stage:'R16', home:'BRA', away:'NOR', dateBJ:'2026-07-06T04:00:00+08:00', venue:'New York New Jersey Stadium, New York/New Jersey', status:'upcoming', score:{home:null,away:null}},
+  // R16-4: winner of MEX/ECU (Jul 1) vs ENG/COD (Jul 2, 00:00) — Jul 12, 05:00 Beijing, Miami
+  {id:'R16-4', stage:'R16', home:'TBD', away:'TBD', dateBJ:'2026-07-12T05:00:00+08:00', venue:'Miami Stadium, Miami', status:'upcoming', score:{home:null,away:null}},
+  // R16-5/6/7/8: winners of ESP/AUT, POR/CRO, BEL/SEN, USA/BIH, SUI/ALG, AUS/EGY, ARG/CPV, COL/GHA
   {id:'R16-5', stage:'R16', home:'TBD', away:'TBD', dateBJ:'2026-07-07T03:00:00+08:00', venue:'Dallas Stadium, Dallas', status:'upcoming', score:{home:null,away:null}},
   {id:'R16-6', stage:'R16', home:'TBD', away:'TBD', dateBJ:'2026-07-07T08:00:00+08:00', venue:'Seattle Stadium, Seattle', status:'upcoming', score:{home:null,away:null}},
   {id:'R16-7', stage:'R16', home:'TBD', away:'TBD', dateBJ:'2026-07-08T00:00:00+08:00', venue:'Atlanta Stadium, Atlanta', status:'upcoming', score:{home:null,away:null}},
   {id:'R16-8', stage:'R16', home:'TBD', away:'TBD', dateBJ:'2026-07-08T04:00:00+08:00', venue:'BC Place Vancouver, Vancouver', status:'upcoming', score:{home:null,away:null}},
 
-  // === QUARTER-FINALS (4 matches) - July 10 · July 12 ===
+  // === QUARTER-FINALS (4 matches) — Jul 10-12 ===
+  // QF1: R16-1 winner vs R16-2 winner — Jul 10, 04:00, Boston
+  // QF2: R16-5 winner vs R16-6 winner — Jul 11, 03:00, Los Angeles
+  // QF3: R16-3 winner vs R16-4 winner — Jul 12, 05:00, Miami
+  // QF4: R16-7 winner vs R16-8 winner — Jul 12, 09:00, Kansas City
   {id:'QF-1', stage:'QF', home:'TBD', away:'TBD', dateBJ:'2026-07-10T04:00:00+08:00', venue:'Boston Stadium, Boston', status:'upcoming', score:{home:null,away:null}},
   {id:'QF-2', stage:'QF', home:'TBD', away:'TBD', dateBJ:'2026-07-11T03:00:00+08:00', venue:'Los Angeles Stadium, Los Angeles', status:'upcoming', score:{home:null,away:null}},
   {id:'QF-3', stage:'QF', home:'TBD', away:'TBD', dateBJ:'2026-07-12T05:00:00+08:00', venue:'Miami Stadium, Miami', status:'upcoming', score:{home:null,away:null}},
   {id:'QF-4', stage:'QF', home:'TBD', away:'TBD', dateBJ:'2026-07-12T09:00:00+08:00', venue:'Kansas City Stadium, Kansas City', status:'upcoming', score:{home:null,away:null}},
 
-  // === SEMI-FINALS (2 matches) - July 15 · July 16 ===
+  // === SEMI-FINALS (2 matches) — Jul 15-16 ===
+  // SF-1: QF1 winner vs QF2 winner — Jul 15, 03:00, Dallas
+  // SF-2: QF3 winner vs QF4 winner — Jul 16, 03:00, Atlanta
   {id:'SF-1', stage:'SF', home:'TBD', away:'TBD', dateBJ:'2026-07-15T03:00:00+08:00', venue:'Dallas Stadium, Dallas', status:'upcoming', score:{home:null,away:null}},
   {id:'SF-2', stage:'SF', home:'TBD', away:'TBD', dateBJ:'2026-07-16T03:00:00+08:00', venue:'Atlanta Stadium, Atlanta', status:'upcoming', score:{home:null,away:null}},
 
-  // === 3RD PLACE (1 match) - July 19 ===
-  {id:'3RD', stage:'3RD', home:'TBD', away:'TBD', dateBJ:'2026-07-19T03:00:00+08:00', venue:'Miami Stadium, Miami', status:'upcoming', score:{home:null,away:null}},
+  // === 3RD PLACE (1 match) — Jul 19, 05:00 ===
+  // SF-1 loser vs SF-2 loser
+  {id:'3RD', stage:'3RD', home:'TBD', away:'TBD', dateBJ:'2026-07-19T05:00:00+08:00', venue:'Miami Stadium, Miami', status:'upcoming', score:{home:null,away:null}},
 
-  // === FINAL (1 match) - July 20 ===
+  // === FINAL (1 match) — Jul 20, 03:00 ===
+  // SF-1 winner vs SF-2 winner
   {id:'FINAL', stage:'FINAL', home:'TBD', away:'TBD', dateBJ:'2026-07-20T03:00:00+08:00', venue:'New York New Jersey Stadium, New York/New Jersey', status:'upcoming', score:{home:null,away:null}},
 ];
 
