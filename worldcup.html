@@ -1177,7 +1177,7 @@ const MATCHES = RAW_MATCHES.map(m => ({
 }));
 
 // ===================== STATE =====================
-let showFinished = false;
+let showFinished = {};
 let currentTab = 'all';
 let currentStage = 'group';
 let apiKey = localStorage.getItem('odds_api_key') || '';
@@ -1421,7 +1421,7 @@ function render() {
 
   // 已完赛比赛折叠区
   if (finishedMatches.length > 0) {
-    const collapsed = !showFinished;
+    const collapsed = !(showFinished[currentStage] || false);
     html += '<div class="finished-section">';
     html += '<div class="finished-header" onclick="toggleFinished()">📋 已完赛（' + finishedMatches.length + ' 场） <span class="arrow">' + (collapsed ? '▼' : '▲') + '</span></div>';
     html += '<div class="finished-body" id="finishedBody" style="display:' + (collapsed ? 'none' : 'block') + '">';
@@ -1779,7 +1779,7 @@ function switchStage(stage) {
   }
 }
 function toggleFinished() {
-  showFinished = !showFinished;
+  showFinished[currentStage] = !(showFinished[currentStage] || false);
   render();
 }
 
