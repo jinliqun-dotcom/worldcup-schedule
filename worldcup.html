@@ -782,8 +782,8 @@ footer {
 </header>
 
 <div class="tabs" id="stageTabs">
-<button class="tab" onclick="switchStage('all')">全部赛程</button>
-  <button class="tab active" onclick="switchStage('group')">小组赛</button>
+<button class="tab active" onclick="switchStage('all')">全部赛程</button>
+  <button class="tab" onclick="switchStage('group')">小组赛</button>
   <button class="tab" onclick="switchStage('r32')">1/16决赛</button>
   <button class="tab" onclick="switchStage('r16')">1/8决赛</button>
   <button class="tab" onclick="switchStage('qf')">1/4决赛</button>
@@ -1179,7 +1179,7 @@ const MATCHES = RAW_MATCHES.map(m => ({
 // ===================== STATE =====================
 let showFinished = {};
 let currentTab = 'all';
-let currentStage = 'group';
+let currentStage = 'all';
 let apiKey = localStorage.getItem('odds_api_key') || '';
 let oddsCache = {};
 let expandedCards = new Set();
