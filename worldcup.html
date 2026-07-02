@@ -772,7 +772,7 @@ footer {
       <input type="text" id="searchInput" placeholder="搜索球队..." oninput="filterMatches()">
     </div>
     <button class="btn odds-key-btn" onclick="showApiKeyModal()" title="设置 The Odds API Key 获取实时赔率">🔑 赔率API</button>
-    <button class="btn" id="btnAll" onclick="switchTab('all')">全部赛程</button>
+    <button class="btn" id="btnAll" onclick="switchTab('all')">赛程</button>
     <button class="btn" id="btnToday" onclick="switchTab('today')">📅 今日</button>
     <button class="btn btn-live" id="btnLive" onclick="switchTab('live')">🔴 进行中</button>
     <button class="btn" id="btnUpcoming" onclick="switchTab('upcoming')">⏳ 即将开始</button>
@@ -782,6 +782,7 @@ footer {
 </header>
 
 <div class="tabs" id="stageTabs">
+<button class="tab" onclick="switchStage('all')">全部赛程</button>
   <button class="tab active" onclick="switchStage('group')">小组赛</button>
   <button class="tab" onclick="switchStage('r32')">1/16决赛</button>
   <button class="tab" onclick="switchStage('r16')">1/8决赛</button>
@@ -1272,18 +1273,20 @@ function render() {
   });
 
   // Filter by stage (always apply)
-  if (currentStage === 'group') {
-    matches = matches.filter(m => m._stage === 'group');
-  } else if (currentStage === 'r32') {
-    matches = matches.filter(m => m._stage === 'R32');
-  } else if (currentStage === 'r16') {
-    matches = matches.filter(m => m._stage === 'R16');
-  } else if (currentStage === 'qf') {
-    matches = matches.filter(m => m._stage === 'QF');
-  } else if (currentStage === 'sf') {
-    matches = matches.filter(m => m._stage === 'SF' || m._stage === '3RD');
-  } else if (currentStage === 'final') {
-    matches = matches.filter(m => m._stage === 'FINAL');
+  if (currentStage !== 'all') {
+    if (currentStage === 'group') {
+      matches = matches.filter(m => m._stage === 'group');
+    } else if (currentStage === 'r32') {
+      matches = matches.filter(m => m._stage === 'R32');
+    } else if (currentStage === 'r16') {
+      matches = matches.filter(m => m._stage === 'R16');
+    } else if (currentStage === 'qf') {
+      matches = matches.filter(m => m._stage === 'QF');
+    } else if (currentStage === 'sf') {
+      matches = matches.filter(m => m._stage === 'SF' || m._stage === '3RD');
+    } else if (currentStage === 'final') {
+      matches = matches.filter(m => m._stage === 'FINAL');
+    }
   }
 
   // Filter by tab
@@ -1760,7 +1763,7 @@ function switchTab(tab) {
 function switchStage(stage) {
   currentStage = stage;
   document.querySelectorAll('#stageTabs .tab').forEach((t, i) => {
-    const stages = ['group','r32','r16','qf','sf','final','standings'];
+    const stages = ['all','group','r32','r16','qf','sf','final','standings'];
     t.classList.toggle('active', stages[i] === stage);
   });
   if (stage === 'standings') {
@@ -2216,7 +2219,7 @@ function togglePyramid() {
     // Reset stage tabs
     currentStage = 'group';
     document.querySelectorAll('#stageTabs .tab').forEach(function(t, i) {
-      var stages = ['group','r32','r16','qf','sf','final','standings'];
+      var stages = ['all','group','r32','r16','qf','sf','final','standings'];
       t.classList.toggle('active', stages[i] === 'group');
     });
     panel.style.display = 'block';
