@@ -721,6 +721,37 @@ footer {
   .s-row .sc:nth-child(7) { display: none; }
 }
 
+
+  /* Finished matches collapse */
+  .finished-section {
+    margin-top: 24px;
+    border-top: 2px solid var(--border);
+    padding-top: 12px;
+  }
+  .finished-header {
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-dim);
+    padding: 8px 12px;
+    background: var(--card);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .finished-header:hover {
+    background: var(--card-hover);
+  }
+  .finished-header .arrow {
+    font-size: 12px;
+    transition: transform 0.2s;
+  }
+  .finished-body {
+    /* content is shown/hidden via JS style.display */
+  }
 </style>
 </head>
 <body>
@@ -1145,6 +1176,7 @@ const MATCHES = RAW_MATCHES.map(m => ({
 }));
 
 // ===================== STATE =====================
+let showFinished = false;
 let currentTab = 'all';
 let currentStage = 'group';
 let apiKey = localStorage.getItem('odds_api_key') || '';
@@ -1239,21 +1271,19 @@ function render() {
     return true;
   });
 
-  // Filter by stage (all 标签下不过滤)
-  if (currentTab !== 'all') {
-    if (currentStage === 'group') {
-      matches = matches.filter(m => m._stage === 'group');
-    } else if (currentStage === 'r32') {
-      matches = matches.filter(m => m._stage === 'R32');
-    } else if (currentStage === 'r16') {
-      matches = matches.filter(m => m._stage === 'R16');
-    } else if (currentStage === 'qf') {
-      matches = matches.filter(m => m._stage === 'QF');
-    } else if (currentStage === 'sf') {
-      matches = matches.filter(m => m._stage === 'SF' || m._stage === '3RD');
-    } else if (currentStage === 'final') {
-      matches = matches.filter(m => m._stage === 'FINAL');
-    }
+  // Filter by stage (always apply)
+  if (currentStage === 'group') {
+    matches = matches.filter(m => m._stage === 'group');
+  } else if (currentStage === 'r32') {
+    matches = matches.filter(m => m._stage === 'R32');
+  } else if (currentStage === 'r16') {
+    matches = matches.filter(m => m._stage === 'R16');
+  } else if (currentStage === 'qf') {
+    matches = matches.filter(m => m._stage === 'QF');
+  } else if (currentStage === 'sf') {
+    matches = matches.filter(m => m._stage === 'SF' || m._stage === '3RD');
+  } else if (currentStage === 'final') {
+    matches = matches.filter(m => m._stage === 'FINAL');
   }
 
   // Filter by tab
@@ -1280,9 +1310,20 @@ function render() {
   liveCount = matches.filter(m => isLive(m)).length;
   document.getElementById('liveBanner').classList.toggle('show', liveCount > 0);
 
-  // Group by date
-  const grouped = {};
+  // Separate finished matches, group by date
+  let finishedMatches = [];
+  let upcomingMatches = [];
   for (let m of matches) {
+    if (m.status === 'done') {
+      finishedMatches.push(m);
+    } else {
+      upcomingMatches.push(m);
+    }
+  }
+
+  // Group upcoming matches by date
+  const grouped = {};
+  for (let m of upcomingMatches) {
     const dk = m.date.toISOString().split('T')[0];
     if (!grouped[dk]) grouped[dk] = [];
     grouped[dk].push(m);
@@ -1290,10 +1331,11 @@ function render() {
 
   let html = '';
 
-  if (matches.length === 0) {
+  if (upcomingMatches.length === 0 && finishedMatches.length === 0) {
     html = '<div class="no-data">📭 暂无匹配的比赛</div>';
   }
 
+  // Render upcoming matches by date
   for (let dk of Object.keys(grouped).sort()) {
     const dayMatches = grouped[dk];
     // 按比赛时间排序，确保同一天内比赛按时间先后展示
@@ -1371,6 +1413,42 @@ function render() {
       }
     }
     html += '</div>';
+  }
+
+
+  // 已完赛比赛折叠区
+  if (finishedMatches.length > 0) {
+    const collapsed = !showFinished;
+    html += '<div class="finished-section">';
+    html += '<div class="finished-header" onclick="toggleFinished()">📋 已完赛（' + finishedMatches.length + ' 场） <span class="arrow">' + (collapsed ? '▼' : '▲') + '</span></div>';
+    html += '<div class="finished-body" id="finishedBody" style="display:' + (collapsed ? 'none' : 'block') + '">';
+    // 按日期分组
+    const finGrouped = {};
+    for (let m of finishedMatches) {
+      const dk = m.date.toISOString().split('T')[0];
+      if (!finGrouped[dk]) finGrouped[dk] = [];
+      finGrouped[dk].push(m);
+    }
+    for (let dk of Object.keys(finGrouped).sort()) {
+      const dayMatches = finGrouped[dk];
+      dayMatches.sort((a, b) => a.date - b.date);
+      const dateObj = new Date(dk + 'T00:00:00+08:00');
+      html += '<div class="date-header">' + fmtDate(dateObj) + ' · ' + dayMatches.length + ' 场比赛（已结束）</div>';
+      html += '<div class="match-grid">';
+      for (let m of dayMatches) {
+        const cardClass = 'done';
+        const isExpanded = expandedCards.has(m.id);
+        const homeScore = m.score.home ?? '-';
+        const awayScore = m.score.away ?? '-';
+        const penHome = m.score.homePen != null ? '(' + m.score.homePen + ')' : '';
+        const penAway = m.score.awayPen != null ? '(' + m.score.awayPen + ')' : '';
+        let scoreHtml = '<div class="score">' + homeScore + penHome + ' : ' + awayScore + penAway + '</div>';
+        let infoHtml = '<div class="info"><span class="group">' + (m.group ? 'G' + m.group : m._stage) + '</span><div class="time" style="color:var(--text-dim)">' + fmtTime(m.date) + '</div><div class="venue">已结束 · <a href="' + getReplayUrl(m) + '" target="_blank" rel="noopener" style="color:var(--accent2);text-decoration:none;">🎬 回放</a></div></div>';
+        html += '<div class="match-card ' + cardClass + '" id="card-' + m.id + '"><div class="team">' + (m.home === 'TBD' ? '<span class="flag flag-na">❓</span>' : '<img class="flag" src="https://flagcdn.com/w40/' + COUNTRY_CODES[m.home] + '.png" alt="' + TEAM_NAMES[m.home] + '" loading="lazy">') + '<span class="name">' + (m.home === 'TBD' ? '待定' : TEAM_NAMES[m.home]) + '</span></div>' + scoreHtml + '<div class="team">' + (m.away === 'TBD' ? '<span class="flag flag-na">❓</span>' : '<img class="flag" src="https://flagcdn.com/w40/' + COUNTRY_CODES[m.away] + '.png" alt="' + TEAM_NAMES[m.away] + '" loading="lazy">') + '<span class="name">' + (m.away === 'TBD' ? '待定' : TEAM_NAMES[m.away]) + '</span></div>' + infoHtml + '</div>';
+      }
+      html += '</div>';
+    }
+    html += '</div></div>';
   }
 
   container.innerHTML = html;
@@ -1697,6 +1775,11 @@ function switchStage(stage) {
     render();
   }
 }
+function toggleFinished() {
+  showFinished = !showFinished;
+  render();
+}
+
 
 function updateButtonStates() {
   document.getElementById('btnAll').classList.toggle('active', currentTab === 'all');
