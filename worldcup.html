@@ -1231,6 +1231,13 @@ function render() {
 
   const container = document.getElementById('content');
   let matches = [...MATCHES];
+  // Remove duplicates by id (some R32/R16 matches appear in both MATCHES and RAW_MATCHES sections)
+  const seen = new Set();
+  matches = matches.filter(m => {
+    if (seen.has(m.id)) return false;
+    seen.add(m.id);
+    return true;
+  });
 
   // Filter by stage (all 标签下不过滤)
   if (currentTab !== 'all') {
