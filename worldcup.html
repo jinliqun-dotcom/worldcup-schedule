@@ -1338,6 +1338,43 @@ function render() {
     html = '<div class="no-data">📭 暂无匹配的比赛</div>';
   }
 
+
+  // 已完赛比赛折叠区
+  if (finishedMatches.length > 0) {
+    const collapsed = !(showFinished[currentStage] || false);
+    html += '<div class="finished-section">';
+    html += '<div class="finished-header" onclick="toggleFinished()">📋 已完赛（' + finishedMatches.length + ' 场） <span class="arrow">' + (collapsed ? '▼' : '▲') + '</span></div>';
+    html += '<div class="finished-body" id="finishedBody" style="display:' + (collapsed ? 'none' : 'block') + '">';
+    // 按日期分组
+    const finGrouped = {};
+    for (let m of finishedMatches) {
+      const dk = m.date.toISOString().split('T')[0];
+      if (!finGrouped[dk]) finGrouped[dk] = [];
+      finGrouped[dk].push(m);
+    }
+    for (let dk of Object.keys(finGrouped).sort()) {
+      const dayMatches = finGrouped[dk];
+      dayMatches.sort((a, b) => a.date - b.date);
+      const dateObj = new Date(dk + 'T00:00:00+08:00');
+      html += '<div class="date-header">' + fmtDate(dateObj) + ' · ' + dayMatches.length + ' 场比赛（已结束）</div>';
+      html += '<div class="match-grid">';
+      for (let m of dayMatches) {
+        const cardClass = 'done';
+        const isExpanded = expandedCards.has(m.id);
+        const homeScore = m.score.home ?? '-';
+        const awayScore = m.score.away ?? '-';
+        const penHome = m.score.homePen != null ? '(' + m.score.homePen + ')' : '';
+        const penAway = m.score.awayPen != null ? '(' + m.score.awayPen + ')' : '';
+        let scoreHtml = '<div class="score">' + homeScore + penHome + ' : ' + awayScore + penAway + '</div>';
+        let infoHtml = '<div class="info"><span class="group">' + (m.group ? 'G' + m.group : m._stage) + '</span><div class="time" style="color:var(--text-dim)">' + fmtTime(m.date) + '</div><div class="venue">已结束 · <a href="' + getReplayUrl(m) + '" target="_blank" rel="noopener" style="color:var(--accent2);text-decoration:none;">🎬 回放</a></div></div>';
+        html += '<div class="match-card ' + cardClass + '" id="card-' + m.id + '"><div class="team">' + (m.home === 'TBD' ? '<span class="flag flag-na">❓</span>' : '<img class="flag" src="https://flagcdn.com/w40/' + COUNTRY_CODES[m.home] + '.png" alt="' + TEAM_NAMES[m.home] + '" loading="lazy">') + '<span class="name">' + (m.home === 'TBD' ? '待定' : TEAM_NAMES[m.home]) + '</span></div>' + scoreHtml + '<div class="team">' + (m.away === 'TBD' ? '<span class="flag flag-na">❓</span>' : '<img class="flag" src="https://flagcdn.com/w40/' + COUNTRY_CODES[m.away] + '.png" alt="' + TEAM_NAMES[m.away] + '" loading="lazy">') + '<span class="name">' + (m.away === 'TBD' ? '待定' : TEAM_NAMES[m.away]) + '</span></div>' + infoHtml + '</div>';
+      }
+      html += '</div>';
+    }
+    html += '</div></div>';
+  }
+
+
   // Render upcoming matches by date
   for (let dk of Object.keys(grouped).sort()) {
     const dayMatches = grouped[dk];
@@ -1417,43 +1454,6 @@ function render() {
     }
     html += '</div>';
   }
-
-
-  // 已完赛比赛折叠区
-  if (finishedMatches.length > 0) {
-    const collapsed = !(showFinished[currentStage] || false);
-    html += '<div class="finished-section">';
-    html += '<div class="finished-header" onclick="toggleFinished()">📋 已完赛（' + finishedMatches.length + ' 场） <span class="arrow">' + (collapsed ? '▼' : '▲') + '</span></div>';
-    html += '<div class="finished-body" id="finishedBody" style="display:' + (collapsed ? 'none' : 'block') + '">';
-    // 按日期分组
-    const finGrouped = {};
-    for (let m of finishedMatches) {
-      const dk = m.date.toISOString().split('T')[0];
-      if (!finGrouped[dk]) finGrouped[dk] = [];
-      finGrouped[dk].push(m);
-    }
-    for (let dk of Object.keys(finGrouped).sort()) {
-      const dayMatches = finGrouped[dk];
-      dayMatches.sort((a, b) => a.date - b.date);
-      const dateObj = new Date(dk + 'T00:00:00+08:00');
-      html += '<div class="date-header">' + fmtDate(dateObj) + ' · ' + dayMatches.length + ' 场比赛（已结束）</div>';
-      html += '<div class="match-grid">';
-      for (let m of dayMatches) {
-        const cardClass = 'done';
-        const isExpanded = expandedCards.has(m.id);
-        const homeScore = m.score.home ?? '-';
-        const awayScore = m.score.away ?? '-';
-        const penHome = m.score.homePen != null ? '(' + m.score.homePen + ')' : '';
-        const penAway = m.score.awayPen != null ? '(' + m.score.awayPen + ')' : '';
-        let scoreHtml = '<div class="score">' + homeScore + penHome + ' : ' + awayScore + penAway + '</div>';
-        let infoHtml = '<div class="info"><span class="group">' + (m.group ? 'G' + m.group : m._stage) + '</span><div class="time" style="color:var(--text-dim)">' + fmtTime(m.date) + '</div><div class="venue">已结束 · <a href="' + getReplayUrl(m) + '" target="_blank" rel="noopener" style="color:var(--accent2);text-decoration:none;">🎬 回放</a></div></div>';
-        html += '<div class="match-card ' + cardClass + '" id="card-' + m.id + '"><div class="team">' + (m.home === 'TBD' ? '<span class="flag flag-na">❓</span>' : '<img class="flag" src="https://flagcdn.com/w40/' + COUNTRY_CODES[m.home] + '.png" alt="' + TEAM_NAMES[m.home] + '" loading="lazy">') + '<span class="name">' + (m.home === 'TBD' ? '待定' : TEAM_NAMES[m.home]) + '</span></div>' + scoreHtml + '<div class="team">' + (m.away === 'TBD' ? '<span class="flag flag-na">❓</span>' : '<img class="flag" src="https://flagcdn.com/w40/' + COUNTRY_CODES[m.away] + '.png" alt="' + TEAM_NAMES[m.away] + '" loading="lazy">') + '<span class="name">' + (m.away === 'TBD' ? '待定' : TEAM_NAMES[m.away]) + '</span></div>' + infoHtml + '</div>';
-      }
-      html += '</div>';
-    }
-    html += '</div></div>';
-  }
-
   container.innerHTML = html;
   updateButtonStates();
 }
