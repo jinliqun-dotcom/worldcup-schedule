@@ -1219,22 +1219,43 @@ function isToday(d) {
 }
 
 // ===================== MATCH STATUS DETECTION =====================
-const MATCH_DURATION_MS = 150 * 60 * 1000; // 2.5 hours per match
+// 加时+点球约 2h45m = 165min；淘汰赛含加时，点球阶段仍算进行中
+const MATCH_DURATION_MS = 165 * 60 * 1000; // 2h45m
+const KNOCKOUT_DURATION_MS = 180 * 60 * 1000; // 3h (淘汰赛加时+点球)
 
 function updateMatchStatuses() {
   const now = new Date();
   for (let m of MATCHES) {
     if (m.home === 'TBD') continue;
-    if (m.status === 'done') continue; // explicitly marked done → keep
+
+    // ✅ 有真实比分数据时，以数据为准，不被时间覆盖
+    // score.home !== null && score.home !== '?' 表示百度API已返回实际比分
+    const hasRealScore = m.score && m.score.home !== null && m.score.home !== '?';
+    if (hasRealScore) {
+      // live 状态由百度比分数据维护；done 状态也尊重数据
+      // 时间仅用于：比赛开始了但还没收到比分 → 标记 live
+      const kickoff = m.date;
+      const isKO = m._stage && ['R32','R16','QF','SF','3RD','FINAL'].includes(m._stage);
+      const endTime = new Date(kickoff.getTime() + (isKO ? KNOCKOUT_DURATION_MS : MATCH_DURATION_MS));
+      if (now >= kickoff && now < endTime) {
+        m.status = 'live'; // 比赛中，有比分但未结束
+      }
+      // 如果百度API已标记done，这里保持done（百度会更新为done）
+      // 如果百度标记done但时间未到，也保持done（已有真实比分）
+      continue;
+    }
+
+    // 没有真实比分时，用时间估算
+    if (m.status === 'done') continue;
     const kickoff = m.date;
-    const end = new Date(kickoff.getTime() + MATCH_DURATION_MS);
-    if (now >= end) {
+    const isKO = m._stage && ['R32','R16','QF','SF','3RD','FINAL'].includes(m._stage);
+    const endTime = new Date(kickoff.getTime() + (isKO ? KNOCKOUT_DURATION_MS : MATCH_DURATION_MS));
+    if (now >= endTime) {
       m.status = 'done';
       if (m.score.home === null) m.score = { home: '?', away: '?' };
     } else if (now >= kickoff) {
       m.status = 'live';
     }
-    // else stays as 'upcoming'
   }
 }
 
@@ -1242,9 +1263,12 @@ function isLive(m) {
   const now = new Date();
   if (m.status === 'done') return false;
   if (m.status === 'live') return true;
+  // 有真实比分但尚未标记 done/live → 比赛中
+  if (m.score && m.score.home !== null && m.score.home !== '?') return true;
   const kickoff = m.date;
-  const end = new Date(kickoff.getTime() + MATCH_DURATION_MS);
-  return kickoff <= now && now <= end;
+  const isKO = m._stage && ['R32','R16','QF','SF','3RD','FINAL'].includes(m._stage);
+  const endTime = new Date(kickoff.getTime() + (isKO ? KNOCKOUT_DURATION_MS : MATCH_DURATION_MS));
+  return kickoff <= now && now <= endTime;
 }
 
 function isUpcoming(m) {
@@ -1739,9 +1763,13 @@ function applyBaiduScores(apiMatches) {
         else if (am.status === 'live') m.status = 'live';
         // Update score if available (swap if reversed)
         if (am.score && am.score.home !== null && am.score.home !== undefined) {
-          m.score = reversed
+          const newScore = reversed
             ? { home: am.score.away, away: am.score.home }
             : { home: am.score.home, away: am.score.away };
+          // 复制点球大战比分
+          if (am.score.homePen != null) newScore.homePen = reversed ? am.score.awayPen : am.score.homePen;
+          if (am.score.awayPen != null) newScore.awayPen = reversed ? am.score.homePen : am.score.awayPen;
+          m.score = newScore;
           // Persist to localStorage so scores survive page refresh / API gaps
           if (am.status === 'done') {
             saveCachedScore(m.id, m.score);
