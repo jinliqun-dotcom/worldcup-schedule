@@ -783,13 +783,13 @@ footer {
 
 <div class="tabs" id="stageTabs">
 <button class="tab active" onclick="switchStage('all')">全部赛程</button>
+  <button class="tab standings-tab" onclick="switchStage('standings')">📊 积分榜</button>
   <button class="tab" onclick="switchStage('group')">小组赛</button>
   <button class="tab" onclick="switchStage('r32')">1/16决赛</button>
   <button class="tab" onclick="switchStage('r16')">1/8决赛</button>
   <button class="tab" onclick="switchStage('qf')">1/4决赛</button>
   <button class="tab" onclick="switchStage('sf')">半决赛</button>
   <button class="tab" onclick="switchStage('final')">决赛</button>
-  <button class="tab standings-tab" onclick="switchStage('standings')">📊 积分榜</button>
 </div>
 
 <div id="content"></div>
@@ -1764,7 +1764,7 @@ function switchStage(stage) {
   currentStage = stage;
   currentTab = 'all';
   document.querySelectorAll('#stageTabs .tab').forEach((t, i) => {
-    const stages = ['all','group','r32','r16','qf','sf','final','standings'];
+    const stages = ['all','standings','group','r32','r16','qf','sf','final'];
     t.classList.toggle('active', stages[i] === stage);
   });
   if (stage === 'standings') {
@@ -2221,7 +2221,7 @@ function togglePyramid() {
     // Reset stage tabs
     currentStage = 'group';
     document.querySelectorAll('#stageTabs .tab').forEach(function(t, i) {
-      var stages = ['all','group','r32','r16','qf','sf','final','standings'];
+      var stages = ['all','standings','group','r32','r16','qf','sf','final'];
       t.classList.toggle('active', stages[i] === 'group');
     });
     panel.style.display = 'block';
