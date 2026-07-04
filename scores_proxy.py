@@ -25,7 +25,11 @@ BIND = "0.0.0.0"
 HTML_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ========== ESPN API ==========
-ESPN_API = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?limit=100"
+# Request yesterday + today + tomorrow to handle timezone differences
+
+def build_espn_url(date_str):
+    """Build ESPN scoreboard URL for a specific date (YYYYMMDD format)."""
+    return f"https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?limit=100&dates={date_str}"
 
 # English (ESPN) / Chinese (frontend) team name mapping
 # Keys: lower-case English name or ESPN abbreviation
@@ -248,110 +252,129 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
 
 def fetch_espn_scores():
     """Fetch live/completed scores from ESPN API.
+    Requests yesterday + today + tomorrow to handle timezone differences.
     Returns list of {home, away, score, status} dicts with CHINESE team names.
     """
-    url = ESPN_API
-    req = urllib.request.Request(url, headers={
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Referer": "https://www.espn.com/",
-    })
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        data = json.loads(resp.read().decode("utf-8"))
+    all_matches = []
+    seen_ids = set()
 
-    matches = []
-    for event in data.get("events", []):
-        # Only process football/soccer World Cup events
-        competitions = event.get("competitions", [])
-        if not competitions:
+    # Get yesterday, today, tomorrow dates in YYYYMMDD format
+    today = datetime.date.today()
+    dates = []
+    for offset in (-1, 0, 1):
+        d = today + datetime.timedelta(days=offset)
+        dates.append(d.strftime("%Y%m%d"))
+
+    for date_str in dates:
+        url = build_espn_url(date_str)
+        try:
+            req = urllib.request.Request(url, headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                "Referer": "https://www.espn.com/",
+            })
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+
+            for event in data.get("events", []):
+                # Deduplicate by event id
+                event_id = event.get("id")
+                if event_id in seen_ids:
+                    continue
+                seen_ids.add(event_id)
+
+                matches = parse_espn_event(event)
+                if matches:
+                    all_matches.extend(matches)
+        except Exception as e:
+            print(f"[ESPN] Failed to fetch {date_str}: {e}", flush=True)
             continue
-        comp = competitions[0]
 
-        # Get teams
-        competitors = comp.get("competitors", [])
-        if len(competitors) < 2:
-            continue
+    print(f"[ESPN] Fetched {len(all_matches)} matches from {len(dates)} dates", flush=True)
+    return all_matches
 
-        # Find home/away
-        home_c = None
-        away_c = None
-        for c in competitors:
-            if c.get("homeAway") == "home":
-                home_c = c
-            elif c.get("homeAway") == "away":
-                away_c = c
 
-        if not home_c or not away_c:
-            # Fallback: use order
-            home_c = competitors[0]
-            away_c = competitors[1]
+def parse_espn_event(event):
+    """Parse a single ESPN event into match dict. Returns list of matches."""
+    competitions = event.get("competitions", [])
+    if not competitions:
+        return []
+    comp = competitions[0]
 
-        # Get English team names
-        home_en = home_c.get("team", {}).get("displayName", "")
-        away_en = away_c.get("team", {}).get("displayName", "")
-        home_abbr = home_c.get("team", {}).get("abbreviation", "").lower()
-        away_abbr = away_c.get("team", {}).get("abbreviation", "").lower()
+    competitors = comp.get("competitors", [])
+    if len(competitors) < 2:
+        return []
 
-        # Convert to Chinese
-        home_cn = _en_to_cn(home_en, home_abbr)
-        away_cn = _en_to_cn(away_en, away_abbr)
-        if not home_cn or not away_cn:
-            continue  # skip if can't map
+    # Find home/away
+    home_c = None
+    away_c = None
+    for c in competitors:
+        if c.get("homeAway") == "home":
+            home_c = c
+        elif c.get("homeAway") == "away":
+            away_c = c
 
-        # Get scores (ESPN: competitors[].scores.value)
-        home_score = home_c.get("scores", {}).get("value")
-        away_score = away_c.get("scores", {}).get("value")
-        if home_score is not None:
-            home_score = int(home_score)
-        if away_score is not None:
-            away_score = int(away_score)
+    if not home_c or not away_c:
+        home_c = competitors[0]
+        away_c = competitors[1]
 
-        # Get status
-        status_info = comp.get("status", {})
-        type_info = status_info.get("type", {})
-        status_type_id = str(type_info.get("id", ""))
-        status_completed = type_info.get("completed", False)
-        status_display = type_info.get("detail", "")
+    # Get English team names
+    home_en = home_c.get("team", {}).get("displayName", "")
+    away_en = away_c.get("team", {}).get("displayName", "")
+    home_abbr = home_c.get("team", {}).get("abbreviation", "").lower()
+    away_abbr = away_c.get("team", {}).get("abbreviation", "").lower()
 
-        # Determine our status
-        if status_completed or status_type_id in ("47", "3", "2", "1"):
-            # 47=FT-Pens, 3=Final, 2=Final, 1=Scheduled
-            status = "done" if status_completed else "upcoming"
-            # Re-check: if status_type_id == "1" → upcoming
-            if status_type_id == "1":
-                status = "upcoming"
-            else:
-                status = "done"
-        elif status_type_id in ("23", "24"):  # In progress
-            status = "live"
-        else:
-            status = "live" if not status_completed else "done"
+    # Convert to Chinese
+    home_cn = _en_to_cn(home_en, home_abbr)
+    away_cn = _en_to_cn(away_en, away_abbr)
+    if not home_cn or not away_cn:
+        return []
 
-        # Check for penalty shootout (ESPN: competitors[].shootoutScores.value)
-        home_pen = home_c.get("shootoutScores", {}).get("value")
-        away_pen = away_c.get("shootoutScores", {}).get("value")
-        if home_pen is not None:
-            home_pen = int(home_pen)
-        if away_pen is not None:
-            away_pen = int(away_pen)
+    # Get scores (ESPN: competitors[].scores.value)
+    home_score = home_c.get("scores", {}).get("value")
+    away_score = away_c.get("scores", {}).get("value")
+    if home_score is not None:
+        home_score = int(home_score)
+    if away_score is not None:
+        away_score = int(away_score)
 
-        score_data = None
-        if home_score is not None and away_score is not None:
-            score_data = {"home": home_score, "away": away_score}
-            if home_pen is not None and away_pen is not None:
-                score_data["homePen"] = home_pen
-                score_data["awayPen"] = away_pen
+    # Get status
+    status_info = comp.get("status", {})
+    type_info = status_info.get("type", {})
+    status_type_id = str(type_info.get("id", ""))
+    status_completed = type_info.get("completed", False)
+    status_display = type_info.get("detail", "")
 
-        matches.append({
-            "home": home_cn,
-            "away": away_cn,
-            "score": score_data,
-            "status": status,
-            "round": comp.get("stage", {}).get("name", ""),
-            "time": status_display,
-        })
+    # Determine our status
+    if status_completed:
+        status = "done"
+    elif status_type_id == "1":  # Scheduled
+        status = "upcoming"
+    else:
+        status = "live"
 
-    print(f"[ESPN] Fetched {len(matches)} matches", flush=True)
-    return matches
+    # Check for penalty shootout
+    home_pen = home_c.get("shootoutScores", {}).get("value")
+    away_pen = away_c.get("shootoutScores", {}).get("value")
+    if home_pen is not None:
+        home_pen = int(home_pen)
+    if away_pen is not None:
+        away_pen = int(away_pen)
+
+    score_data = None
+    if home_score is not None and away_score is not None:
+        score_data = {"home": home_score, "away": away_score}
+        if home_pen is not None and away_pen is not None:
+            score_data["homePen"] = home_pen
+            score_data["awayPen"] = away_pen
+
+    return [{
+        "home": home_cn,
+        "away": away_cn,
+        "score": score_data,
+        "status": status,
+        "round": comp.get("stage", {}).get("name", ""),
+        "time": status_display,
+    }]
 
 
 def _en_to_cn(en_name, abbr=""):
