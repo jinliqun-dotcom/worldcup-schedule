@@ -1273,7 +1273,7 @@ function isLive(m) {
 
 function isUpcoming(m) {
   if (m.status === 'done') return false;
-  if (m.status === 'live') return true;
+  if (m.status === 'live') return false;
   return m.date > new Date();
 }
 
