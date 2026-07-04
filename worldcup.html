@@ -1308,7 +1308,9 @@ function render() {
     } else if (currentStage === 'qf') {
       matches = matches.filter(m => m._stage === 'QF');
     } else if (currentStage === 'sf') {
-      matches = matches.filter(m => m._stage === 'SF' || m._stage === '3RD');
+      matches = matches.filter(m => m._stage === 'SF');
+    } else if (currentStage === '3rd') {
+      matches = matches.filter(m => m._stage === '3RD');
     } else if (currentStage === 'final') {
       matches = matches.filter(m => m._stage === 'FINAL');
     }
