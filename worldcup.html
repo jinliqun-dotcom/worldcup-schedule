@@ -1232,16 +1232,14 @@ function updateMatchStatuses() {
     // score.home !== null && score.home !== '?' 表示百度API已返回实际比分
     const hasRealScore = m.score && m.score.home !== null && m.score.home !== '?';
     if (hasRealScore) {
-      // live 状态由百度比分数据维护；done 状态也尊重数据
-      // 时间仅用于：比赛开始了但还没收到比分 → 标记 live
       const kickoff = m.date;
       const isKO = m._stage && ['R32','R16','QF','SF','3RD','FINAL'].includes(m._stage);
       const endTime = new Date(kickoff.getTime() + (isKO ? KNOCKOUT_DURATION_MS : MATCH_DURATION_MS));
-      if (now >= kickoff && now < endTime) {
-        m.status = 'live'; // 比赛中，有比分但未结束
+      if (now >= endTime) {
+        m.status = 'done';  // ✅ 比赛已结束
+      } else if (now >= kickoff) {
+        m.status = 'live'; // 比赛中
       }
-      // 如果百度API已标记done，这里保持done（百度会更新为done）
-      // 如果百度标记done但时间未到，也保持done（已有真实比分）
       continue;
     }
 
@@ -1260,25 +1258,16 @@ function updateMatchStatuses() {
 }
 
 function isLive(m) {
-  const now = new Date();
-  if (m.status === 'done') return false;
-  if (m.status === 'live') return true;
-  // 有真实比分但尚未标记 done/live → 比赛中
-  if (m.score && m.score.home !== null && m.score.home !== '?') return true;
-  const kickoff = m.date;
-  const isKO = m._stage && ['R32','R16','QF','SF','3RD','FINAL'].includes(m._stage);
-  const endTime = new Date(kickoff.getTime() + (isKO ? KNOCKOUT_DURATION_MS : MATCH_DURATION_MS));
-  return kickoff <= now && now <= endTime;
+  return m.status === 'live';
 }
 
 function isUpcoming(m) {
-  if (m.status === 'done') return false;
-  if (m.status === 'live') return false;
-  return m.date > new Date();
+  return m.status === 'upcoming';
 }
 
 // ===================== RENDER =====================
 function render() {
+  updateMatchStatuses(); // ✅ 每次渲染前先刷新状态
   // Hide standings / bracket when showing match list
   document.getElementById('standingsContainer').style.display = 'none';
   document.getElementById('bracketContainer').style.display = 'none';
