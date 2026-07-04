@@ -1,10 +1,15 @@
 """
-Baidu Sports live score proxy server.
-Serves worldcup.html on localhost + proxies Baidu API for live scores.
-Zero quota usage - uses Baidu's free match data.
+World Cup live score proxy server.
+Serves worldcup.html on localhost + proxies ESPN & Baidu APIs for live scores.
+
+Sources (in order of preference):
+  1. ESPN API (primary, official, free, no CORS)
+  2. Baidu Sports (fallback)
 
 Usage: python3 scores_proxy.py
 Then open http://localhost:8765 in browser.
+
+Deploy: Render.com (free tier, auto-deploy from GitHub)
 """
 import http.server
 import urllib.request
@@ -18,15 +23,92 @@ from html import unescape
 PORT = int(os.environ.get("PORT", 8765))
 BIND = "0.0.0.0"
 HTML_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# ========== ESPN API ==========
+ESPN_API = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?limit=100"
+
+# English (ESPN) / Chinese (frontend) team name mapping
+# Keys: lower-case English name or ESPN abbreviation
+TEAM_EN_TO_CN = {
+    # A
+    "mexico": "墨西哥", "mex": "墨西哥",
+    "south africa": "南非", "bafana": "南非", "rsa": "南非",
+    # B
+    "canada": "加拿大", "can": "加拿大",
+    "bosnia": "波黑", "bosnia and herzegovina": "波黑", "bih": "波黑",
+    # C
+    "brazil": "巴西", "bra": "巴西",
+    "morocco": "摩洛哥", "mar": "摩洛哥",
+    "haiti": "海地", "hai": "海地",
+    "scotland": "苏格兰", "sco": "苏格兰",
+    # D
+    "usa": "美国", "united states": "美国", "usmnt": "美国",
+    "paraguay": "巴拉圭", "par": "巴拉圭",
+    "australia": "澳大利亚", "aus": "澳大利亚",
+    "turkey": "土耳其", "tur": "土耳其",
+    # E
+    "germany": "德国", "ger": "德国",
+    "curacao": "库拉索", "cuw": "库拉索",
+    "ivory coast": "科特迪瓦", "cote d'ivoire": "科特迪瓦", "civ": "科特迪瓦",
+    "ecuador": "厄瓜多尔", "ecu": "厄瓜多尔",
+    # F
+    "netherlands": "荷兰", "ned": "荷兰",
+    "japan": "日本", "jpn": "日本",
+    "sweden": "瑞典", "swe": "瑞典",
+    "tunisia": "突尼斯", "tun": "突尼斯",
+    # G
+    "spain": "西班牙", "esp": "西班牙",
+    "cape verde": "佛得角", "cpv": "佛得角",
+    "saudi arabia": "沙特", "korea saudi": "沙特", "ksa": "沙特",
+    "uruguay": "乌拉圭", "uru": "乌拉圭",
+    # H
+    "belgium": "比利时", "bel": "比利时",
+    "egypt": "埃及", "egy": "埃及",
+    "iran": "伊朗", "irn": "伊朗",
+    "new zealand": "新西兰", "nzl": "新西兰",
+    # I
+    "france": "法国", "fra": "法国",
+    "senegal": "塞内加尔", "sen": "塞内加尔",
+    "iraq": "伊拉克", "irq": "伊拉克",
+    "norway": "挪威", "nor": "挪威",
+    # J
+    "argentina": "阿根廷", "arg": "阿根廷",
+    "algeria": "阿尔及利亚", "alg": "阿尔及利亚",
+    "austria": "奥地利", "aut": "奥地利",
+    "jordan": "约旦", "jor": "约旦",
+    # K
+    "portugal": "葡萄牙", "por": "葡萄牙",
+    "dr congo": "刚果民主共和国", "congo dr": "刚果民主共和国", "cod": "刚果民主共和国",
+    "uzbekistan": "乌兹别克斯坦", "uzb": "乌兹别克斯坦",
+    "colombia": "哥伦比亚", "col": "哥伦比亚",
+    # L
+    "england": "英格兰", "eng": "英格兰",
+    "croatia": "克罗地亚", "cro": "克罗地亚",
+    "ghana": "加纳", "gha": "加纳",
+    "panama": "巴拿马", "pan": "巴拿马",
+    # others
+    "korea": "韩国", "korea republic": "韩国", "kor": "韩国",
+    "czech": "捷克", "czech republic": "捷克", "cze": "捷克",
+    "qatar": "卡塔尔", "qat": "卡塔尔",
+    "switzerland": "瑞士", "sui": "瑞士",
+    "poland": "波兰", "pol": "波兰",
+    "denmark": "丹麦", "den": "丹麦",
+    "serbia": "塞尔维亚", "srb": "塞尔维亚",
+    "nigeria": "尼日利亚", "nga": "尼日利亚",
+    "cameroon": "喀麦隆", "cmr": "喀麦隆",
+}
+
+# Baidu API (fallback)
 BAIDU_API = "https://tiyu.baidu.com/api/na/subscribe?subscribeID=69&appKey=NA_matchschedule"
 
 # World Cup start date for historical data scraping
 WC_START = datetime.date(2026, 6, 11)
 
-# Server-side cache: {date_str: [matches], ...}
+# Server-side cache
 _history_cache = {}
 _cache_full_ts = 0.0
 CACHE_TTL = 600  # refresh full history every 10 minutes
+
 
 class ProxyHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -50,6 +132,23 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
             super().do_GET()
 
     def serve_scores(self):
+        """Try ESPN first, fall back to Baidu."""
+        errors = []
+
+        # --- Try ESPN ---
+        try:
+            espn_matches = fetch_espn_scores()
+            if espn_matches:
+                self.send_json({
+                    "matches": espn_matches,
+                    "updated": datetime.datetime.now().isoformat(),
+                    "source": "espn.com"
+                })
+                return
+        except Exception as e:
+            errors.append(f"ESPN: {e}")
+
+        # --- Fallback: Baidu ---
         try:
             req = urllib.request.Request(BAIDU_API, headers={
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -58,18 +157,16 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
             with urllib.request.urlopen(req, timeout=10) as resp:
                 html = resp.read().decode("utf-8")
 
-            matches = parse_scores(html)
+            matches = parse_baidu_scores(html)
 
             # Merge with historical scores (cached server-side)
             try:
                 today = datetime.date.today()
-                # Always refresh today + yesterday from page (live data)
                 recent = []
                 for offset in (0, 1):
                     date_str = (today - datetime.timedelta(days=offset)).strftime("%Y-%m-%d")
                     recent.extend(fetch_page_scores(date_str))
 
-                # Full history: fetch all WC dates if cache expired
                 global _history_cache, _cache_full_ts
                 if _time.time() - _cache_full_ts > CACHE_TTL:
                     print(f"[{datetime.datetime.now():%H:%M:%S}] 刷新完整历史比分缓存...", flush=True)
@@ -78,7 +175,6 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
                     fetched_dates = 0
                     for offset in range(delta + 1):
                         date_str = (today - datetime.timedelta(days=offset)).strftime("%Y-%m-%d")
-                        # Skip today+yesterday (already fetched fresh above)
                         if offset <= 1:
                             continue
                         page_matches = fetch_page_scores(date_str)
@@ -89,12 +185,10 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
                     _cache_full_ts = _time.time()
                     print(f"[{datetime.datetime.now():%H:%M:%S}] 缓存了 {fetched_dates} 天历史数据", flush=True)
 
-                # Collect: recent (fresh) + history cache
                 all_page_matches = list(recent)
                 for date_str, page_matches in _history_cache.items():
                     all_page_matches.extend(page_matches)
 
-                # Deduplicate page matches by (home, away) key
                 deduped = {}
                 for m in all_page_matches:
                     k = (m["home"], m["away"])
@@ -102,7 +196,6 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
                         deduped[k] = m
                 all_page_matches = list(deduped.values())
 
-                # Merge: page results override subscribe data
                 merged = []
                 page_keys = {(m["home"], m["away"]) for m in all_page_matches}
                 for m in matches:
@@ -114,22 +207,28 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
                                 break
                     else:
                         merged.append(m)
-                # Add page matches not in subscribe at all
                 sub_keys = {(m["home"], m["away"]) for m in matches}
                 for pm in all_page_matches:
                     if (pm["home"], pm["away"]) not in sub_keys:
                         merged.append(pm)
                 matches = merged
             except Exception as e:
-                print(f"[{datetime.datetime.now():%H:%M:%S}] page fallback failed: {e}", flush=True)
+                print(f"[{datetime.datetime.now():%H:%M:%S}] Baidu page fallback failed: {e}", flush=True)
 
             self.send_json({
                 "matches": matches,
                 "updated": datetime.datetime.now().isoformat(),
                 "source": "tiyu.baidu.com"
             })
+            return
+
         except Exception as e:
-            self.send_json({"error": str(e), "updated": datetime.datetime.now().isoformat()}, status=500)
+            errors.append(f"Baidu: {e}")
+            self.send_json({
+                "error": "; ".join(errors),
+                "updated": datetime.datetime.now().isoformat(),
+                "matches": []
+            }, status=500)
 
     def send_json(self, data, status=200):
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
@@ -142,23 +241,147 @@ class ProxyHandler(http.server.SimpleHTTPRequestHandler):
 
     def log_message(self, format, *args):
         if "/api/scores" in str(args):
-            print(f"[{datetime.datetime.now():%H:%M:%S}] /api/scores")
+            print(f"[{datetime.datetime.now():%H:%M:%S}] /api/scores", flush=True)
 
 
-def parse_scores(html):
+# ========== ESPN API ==========
+
+def fetch_espn_scores():
+    """Fetch live/completed scores from ESPN API.
+    Returns list of {home, away, score, status} dicts with CHINESE team names.
+    """
+    url = ESPN_API
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Referer": "https://www.espn.com/",
+    })
+    with urllib.request.urlopen(req, timeout=15) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+
+    matches = []
+    for event in data.get("events", []):
+        # Only process football/soccer World Cup events
+        competitions = event.get("competitions", [])
+        if not competitions:
+            continue
+        comp = competitions[0]
+
+        # Get teams
+        competitors = comp.get("competitors", [])
+        if len(competitors) < 2:
+            continue
+
+        # Find home/away
+        home_c = None
+        away_c = None
+        for c in competitors:
+            if c.get("homeAway") == "home":
+                home_c = c
+            elif c.get("homeAway") == "away":
+                away_c = c
+
+        if not home_c or not away_c:
+            # Fallback: use order
+            home_c = competitors[0]
+            away_c = competitors[1]
+
+        # Get English team names
+        home_en = home_c.get("team", {}).get("displayName", "")
+        away_en = away_c.get("team", {}).get("displayName", "")
+        home_abbr = home_c.get("team", {}).get("abbreviation", "").lower()
+        away_abbr = away_c.get("team", {}).get("abbreviation", "").lower()
+
+        # Convert to Chinese
+        home_cn = _en_to_cn(home_en, home_abbr)
+        away_cn = _en_to_cn(away_en, away_abbr)
+        if not home_cn or not away_cn:
+            continue  # skip if can't map
+
+        # Get scores (ESPN: competitors[].scores.value)
+        home_score = home_c.get("scores", {}).get("value")
+        away_score = away_c.get("scores", {}).get("value")
+        if home_score is not None:
+            home_score = int(home_score)
+        if away_score is not None:
+            away_score = int(away_score)
+
+        # Get status
+        status_info = comp.get("status", {})
+        type_info = status_info.get("type", {})
+        status_type_id = str(type_info.get("id", ""))
+        status_completed = type_info.get("completed", False)
+        status_display = type_info.get("detail", "")
+
+        # Determine our status
+        if status_completed or status_type_id in ("47", "3", "2", "1"):
+            # 47=FT-Pens, 3=Final, 2=Final, 1=Scheduled
+            status = "done" if status_completed else "upcoming"
+            # Re-check: if status_type_id == "1" → upcoming
+            if status_type_id == "1":
+                status = "upcoming"
+            else:
+                status = "done"
+        elif status_type_id in ("23", "24"):  # In progress
+            status = "live"
+        else:
+            status = "live" if not status_completed else "done"
+
+        # Check for penalty shootout (ESPN: competitors[].shootoutScores.value)
+        home_pen = home_c.get("shootoutScores", {}).get("value")
+        away_pen = away_c.get("shootoutScores", {}).get("value")
+        if home_pen is not None:
+            home_pen = int(home_pen)
+        if away_pen is not None:
+            away_pen = int(away_pen)
+
+        score_data = None
+        if home_score is not None and away_score is not None:
+            score_data = {"home": home_score, "away": away_score}
+            if home_pen is not None and away_pen is not None:
+                score_data["homePen"] = home_pen
+                score_data["awayPen"] = away_pen
+
+        matches.append({
+            "home": home_cn,
+            "away": away_cn,
+            "score": score_data,
+            "status": status,
+            "round": comp.get("stage", {}).get("name", ""),
+            "time": status_display,
+        })
+
+    print(f"[ESPN] Fetched {len(matches)} matches", flush=True)
+    return matches
+
+
+def _en_to_cn(en_name, abbr=""):
+    """Convert English team name to Chinese using mapping dict."""
+    if not en_name and not abbr:
+        return None
+    key = (en_name or "").strip().lower()
+    if key in TEAM_EN_TO_CN:
+        return TEAM_EN_TO_CN[key]
+    if abbr and abbr in TEAM_EN_TO_CN:
+        return TEAM_EN_TO_CN[abbr]
+    # Try partial match
+    for k, v in TEAM_EN_TO_CN.items():
+        if k in key or key in k:
+            return v
+    return en_name  # fallback: return English name as-is
+
+
+# ========== Baidu API (fallback) ==========
+
+def parse_baidu_scores(html):
     """Parse Baidu Sports HTML into match data."""
     html = unescape(html)
     matches = []
 
-    # Each match is in <a class="c-blocka wa-tiyu-schedule-item">
-    # Split by schedule items
     items = re.split(r'<a[^>]*wa-tiyu-schedule-item[^>]*>', html)
-    # Remove anything before first item (header)
     if items:
         items = items[1:]
 
     for item in items:
-        # Extract name, score, status from each match item
         names = re.findall(r'<span[^>]*c-line-clamp1[^>]*>\s*(.+?)\s*</span>', item, re.DOTALL)
         scores = re.findall(r'<div[^>]*team-row-score[^>]*>\s*<span[^>]*>\s*(\S+?)\s*</span>', item, re.DOTALL)
         status_match = re.search(r'<div[^>]*status-text[^>]*>\s*(.+?)\s*</div>', item, re.DOTALL)
@@ -180,7 +403,6 @@ def parse_scores(html):
             elif "取消" in status_text or "推迟" in status_text or "中止" in status_text:
                 continue
 
-            # Skip non-World-Cup matches (filter by round text)
             if not ("决赛" in round_text or "小组" in round_text):
                 continue
 
@@ -189,10 +411,7 @@ def parse_scores(html):
             home_score_raw = scores[0].strip()
             away_score_raw = scores[1].strip()
 
-            # Parse penalty scores: "2", "1[3]", "[4]" etc.
             score_data = None
-            homePen = None
-            awayPen = None
             hm = re.match(r'^(\d+)(?:\[(\d+)\])?$', home_score_raw)
             am = re.match(r'^(\d+)(?:\[(\d+)\])?$', away_score_raw)
             if hm and am:
@@ -214,9 +433,10 @@ def parse_scores(html):
 
 
 def fetch_page_scores(date_str):
-    """Scrape al/match page for completed matches on a given date.
-    date_str: YYYY-MM-DD format."""
-    url = f"https://tiyu.baidu.com/al/match?match=%E4%B8%96%E7%95%8C%E6%9D%AF&date_time={date_str}&tab=%E8%B5%9B%E7%A8%8B&from=baidu_aladdin"
+    """Scrape al/match page for completed matches on a given date."""
+    url = (f"https://tiyu.baidu.com/al/match"
+            f"?match=%E4%B8%96%E7%95%8C%E6%9D%AF&date_time={date_str}"
+            f"&tab=%E8%B5%9B%E7%A8%8B&from=baidu_aladdin")
     try:
         req = urllib.request.Request(url, headers={
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -227,24 +447,18 @@ def fetch_page_scores(date_str):
     except Exception:
         return []
 
-    # Strip all HTML tags to get plain text
     text = re.sub(r'<[^>]+>', ' ', raw)
     text = unescape(text)
-    # Collapse whitespace but keep line breaks for structure
     text = re.sub(r'[ \t]+', ' ', text)
 
-    # Match completed matches: HH:MM round_text team1 score1 team2 score2 已结束
-    # Also match: HH:MM round_text team1 - team2 - 未开赛 (to avoid false matches)
-    # Match done: time round team score [pen] team score [pen] 已结束
-    # e.g. 德国 1 [3] 巴拉圭 1 [4] 已结束
     pat_main = re.compile(
-        r'(\d{2}:\d{2})\s+'   # time
-        r'([^0-9]+?)\s+'       # round text
-        r'(\S+?)\s+'           # home team
-        r'(\d+)\s*(?:\[(\d+)\])?'  # home score + optional [pen]
+        r'(\d{2}:\d{2})\s+'
+        r'([^0-9]+?)\s+'
+        r'(\S+?)\s+'
+        r'(\d+)\s*(?:\[(\d+)\])?'
         r'\s+'
-        r'(\S+?)\s+'           # away team
-        r'(\d+)\s*(?:\[(\d+)\])?'  # away score + optional [pen]
+        r'(\S+?)\s+'
+        r'(\d+)\s*(?:\[(\d+)\])?'
         r'\s+已结束'
     )
 
@@ -255,17 +469,16 @@ def fetch_page_scores(date_str):
         round_text = m.group(2).strip()
         home_name = m.group(3).strip()
         home_score = m.group(4)
-        home_pen = m.group(5)  # may be None
+        home_pen = m.group(5)
         away_name = m.group(6).strip()
         away_score = m.group(7)
-        away_pen = m.group(8)  # may be None
+        away_pen = m.group(8)
 
         key = (home_name, away_name, home_score, away_score)
         if key in seen:
             continue
         seen.add(key)
 
-        # Only World Cup matches
         if "小组赛" not in round_text and "世界杯" not in round_text.lower():
             continue
 
@@ -276,18 +489,17 @@ def fetch_page_scores(date_str):
         results.append({
             "home": home_name,
             "away": away_name,
-                "score": sd,
-                "status": "done",
-                "round": round_text,
-                "time": match_time
-            })
+            "score": sd,
+            "status": "done",
+            "round": round_text,
+            "time": match_time
+        })
 
     return results
 
 
 if __name__ == "__main__":
-    import sys
-    print(f"[{datetime.datetime.now():%H:%M:%S}] 世界杯比分代理服务启动", flush=True)
+    print(f"[{datetime.datetime.now():%H:%M:%S}] 世界杯比分代理服务启动 (ESPN + Baidu)", flush=True)
     print(f"  页面: http://localhost:{PORT}", flush=True)
     print(f"  比分接口: http://localhost:{PORT}/api/scores", flush=True)
     print(flush=True)
