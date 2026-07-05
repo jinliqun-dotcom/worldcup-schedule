@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 世界杯 · 赛程对阵图</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; overflow:hidden; }
+
+body {
+  background: #0a0e17;
+  color: #d0d8e8;
+  font-family: 'Segoe UI','Microsoft YaHei','PingFang SC',sans-serif;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* ── Header ── */
+header {
+  flex-shrink: 0;
+  background: linear-gradient(135deg,#1a3a5c 0%,#1e4976 50%,#15304d 100%);
+  border-bottom: 3px solid #c78a08;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  z-index: 10;
+}
+.logo { display:flex; align-items:center; gap:12px; }
+.logo-icon { font-size:26px; }
+.logo h1 { font-size:22px; font-weight:800; color:#ffd54f; letter-spacing:0.5px; }
+.logo span { font-size:12px; color:rgba(255,255,255,0.6); display:block; }
+.header-link {
+  color:rgba(255,255,255,0.8); text-decoration:none; font-size:13px;
+  padding:6px 14px; border:1px solid rgba(255,255,255,0.3);
+  border-radius:5px; transition:all 0.2s; white-space:nowrap;
+}
+.header-link:hover { background:rgba(255,255,255,0.1); color:#fff; }
+
+/* ── Scroll container: takes all remaining height ── */
+.bracket-scroll {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* Custom scrollbar */
+.bracket-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+.bracket-scroll::-webkit-scrollbar-track { background: #0a0e17; }
+.bracket-scroll::-webkit-scrollbar-thumb { background: #2a3a5a; border-radius: 4px; }
+.bracket-scroll::-webkit-scrollbar-thumb:hover { background: #4a6a8a; }
+.bracket-scroll::-webkit-scrollbar-corner { background: #0a0e17; }
+
+/* ── Bracket layout ── */
+.bracket {
+  display: inline-block;
+  min-width: max-content;
+  padding: 12px 10px 16px;
+}
+
+/* ── R32 merged header (spans col 4–5 via ::before on .lbl-row) ── */
+/* Col widths for reference (must match grid-template-columns below):
+   1:108px  2:108px  3:108px  4:126px  5:126px  6:118px  7:96px  8:84px  9:88px  10:130px  11:120px */
+
+/* CSS Grid: 11 columns (champions moved to col 11) */
+.bracket-grid {
+  display: grid;
+  /* Groups   Groups   Groups   R32U   R32L   R16   QF   SF   3RD  Final  Champ */
+  grid-template-columns:
+    108px     108px    108px    126px  126px  118px  96px  84px  88px  130px  120px;
+  grid-template-rows: 30px auto;
+  gap: 0;
+  align-items: start;
+  position: relative;   /* needed for .lbl-row ::before positioning */
+}
+
+/* ── R32 merged header injected via ::before ── */
+.lbl-row {
+  display: contents;  /* children are grid items */
+}
+.lbl-row::before {
+  content: '16分之一决赛 · Round of 32';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68em;
+  font-weight: 700;
+  color: #c78a08;            /* ── same as .lbl ── */
+  letter-spacing: 0.05em;
+  /* col4=126px + col5=126px = 252px */
+  width: 252px;
+  height: 28px;
+  /* ── no border, no background – consistent with .lbl ── */
+  /* col1(108)+col2(108)+col3(108)=324px offset to land on col4 */
+  margin-left: 324px;
+  box-sizing: border-box;
+  grid-column: 1;   /* dummy – doesn't affect flex layout below */
+  position: absolute;
+  top: 1px;
+  z-index: 2;
+}
+
+/* ── Label row ── */
+.lbl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68em;
+  font-weight: 700;
+  color: #c78a08;            /* ── amber/gold – matches header border & R32 banner ── */
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+  padding: 0 4px;
+  /* no border, no background – all 11 label cells are identical */
+  height: 28px;
+  white-space: nowrap;
+}
+.lbl-sub {
+  font-size: 0.6em;
+  font-weight: 700;
+  color: #c78a08;            /* same family, slightly dimmer */
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Champion results column ── */
+.col-champ {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  padding: 4px 4px;
+  min-height: 680px;
+  border-left: 1px solid #1f2a3a;
+}
+.champ-wrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── Content columns (flex, space-around for centering) ── */
+.col-g, .col-ko {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  padding: 4px 4px;
+  min-height: 680px;
+  border-left: 1px solid #1f2a3a;
+}
+.col-g:first-child { border-left: none; } /* not used but safe */
+
+/* Group sub-column (inside the Groups block) */
+.g-sub {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  flex: 1;
+}
+
+/* ── Match card ── */
+.bm {
+  background: #0f1420;
+  border: 1px solid #1e2d47;
+  border-radius: 4px;
+  padding: 4px 5px;
+  font-size: 0.78em;
+  line-height: 1.3;
+  transition: border-color 0.2s;
+  flex-shrink: 0;
+  /* Fixed height keeps all cards same size in each column */
+  height: 62px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.bm:hover { border-color: #3a5a8a; }
+.bm.live { border-color: #d32f2f; }
+.bm.done { border-color: #1e3a1e; }
+.bm.final {
+  background: linear-gradient(135deg,#1a1828,#0f1118);
+  border-color: #5a4a20;
+  border-width: 1.5px;
+  height: 62px;
+}
+.bm.final:hover { border-color: #e8b820; box-shadow: 0 0 12px rgba(232,184,20,0.15); }
+
+.bm-hdr {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  margin-bottom: 2px;
+}
+.bm-n { font-size: 0.72em; color: #4a6d99; min-width: 44px; flex-shrink: 0; }
+.bm-t { font-size: 0.68em; color: #5a7a9a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.bm-r { display: flex; align-items: center; gap: 2px; margin: 1px 0; }
+.bp { font-size: 0.72em; min-width: 16px; text-align: center; flex-shrink: 0; }
+.bp.w1 { color: #4caf50; }
+.bp.l1 { color: #e53935; }
+.bp.dr { color: #6a7a8a; }
+.bt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.95em; }
+.bt img { vertical-align: middle; margin-right: 2px; }
+.bs { font-weight: 700; min-width: 18px; text-align: right; font-family: 'Segoe UI',monospace; flex-shrink: 0; }
+.bs.w { color: #4caf50; }
+.bm.live .bs { color: #ff6b6b; }
+
+/* ── Group card ── */
+.gc {
+  background: #0d111c;
+  border: 1px solid #1a2434;
+  border-radius: 3px;
+  flex-shrink: 0;
+  height: 62px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3px 5px;
+}
+.gc-hdr {
+  font-size: 0.65em; font-weight: 700; color: #4a6d99;
+  text-align: center; letter-spacing: 0.05em;
+  border-bottom: 1px solid #1a2434;
+  padding: 1px 0 2px;
+  margin-bottom: 1px;
+}
+.gc-r { display:flex; gap:2px; align-items:center; font-size:0.68em; padding:0 2px; }
+.gc-i { font-size:0.8em; color:#4a6d99; min-width:12px; flex-shrink:0; }
+.gc-t { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.gc-t img { vertical-align:middle; margin-right:2px; }
+.gc-s { font-size:0.8em; color:#5a7a9a; flex-shrink:0; }
+.gc-p { font-size:0.8em; font-weight:700; color:#4da6ff; min-width:18px; text-align:right; flex-shrink:0; }
+
+
+.champ {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75em;
+  padding: 3px 6px;
+  flex-shrink: 0;
+}
+.champ.gold { background: rgba(199,138,8,0.15); border-radius: 3px; }
+.champ.tbd  { opacity: 0.4; }
+.ci { font-size: 1.1em; }
+.ct { }
+.ct img { vertical-align: middle; margin-right: 2px; }
+
+/* ── Legend & note ── */
+.foot {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 10px;
+  padding: 0 6px;
+  font-size: 0.68em;
+  color: #3a4a5a;
+}
+.foot-item { display:flex; align-items:center; gap:4px; }
+.foot-dot { width:7px; height:7px; border-radius:2px; flex-shrink:0; }
+.foot-dot.w { background:#4caf50; }
+.foot-dot.l { background:#e53935; }
+.foot-dot.d { background:#4a5a6a; }
+.foot-note { color:#2a3a4a; margin-left: auto; letter-spacing:0.03em; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-icon">🏆</span>
+    <div>
+      <h1>世界杯对阵图</h1>
+      <span>2026 FIFA World Cup · Bracket</span>
+    </div>
+  </div>
+  <a class="header-link" href="worldcup.html">📋 返回全部赛程</a>
+</header>
+
+<div class="bracket-scroll">
+  <div class="bracket">
+    <div class="bracket-grid" id="bracketRoot"></div>
+    <div class="foot">
+      <span class="foot-item"><span class="foot-dot w"></span>胜者</span>
+      <span class="foot-item"><span class="foot-dot l"></span>负者</span>
+      <span class="foot-item"><span class="foot-dot d"></span>待定</span>
+      <span class="foot-note">48队 → 12小组(A-L) → 前2+8最佳第3 → 32强 → 16强 → 8强 → 半决赛 → 决赛</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const CC = {MEX:'mx',RSA:'za',KOR:'kr',JPN:'jp',URU:'uy',ARG:'ar',BRA:'br',COL:'co',ECU:'ec',PER:'pe',CHI:'cl',USA:'us',CAN:'ca',CRC:'cr',HON:'hn',JAM:'jm',TRI:'tt',GER:'de',ENG:'gb-eng',FRA:'fr',ESP:'es',ITA:'it',NED:'nl',POR:'pt',BEL:'be',SUI:'ch',CRO:'hr',SWE:'se',NOR:'no',DEN:'dk',POL:'pl',AUT:'at',CZE:'cz',HUN:'hu',GRE:'gr',ROU:'ro',SRB:'rs',TUR:'tr',SCO:'gb-sct',WAL:'gb-wls',MAR:'ma',EGY:'eg',SEN:'sn',NGA:'ng',CMR:'cm',CIV:'ci',GHA:'gh',ALG:'dz',TUN:'tn',CPV:'cv',COD:'cd',AUS:'au',NZL:'nz',KSA:'sa',IRN:'ir',PAR:'py'};
+const TN = {MEX:'墨西哥',RSA:'南非',KOR:'韩国',JPN:'日本',URU:'乌拉圭',ARG:'阿根廷',BRA:'巴西',COL:'哥伦比亚',ECU:'厄瓜多尔',PER:'秘鲁',CHI:'智利',USA:'美国',CAN:'加拿大',CRC:'哥斯达黎加',HON:'洪都拉斯',JAM:'牙买加',TRI:'特立尼达',GER:'德国',ENG:'英格兰',FRA:'法国',ESP:'西班牙',ITA:'意大利',NED:'荷兰',POR:'葡萄牙',BEL:'比利时',SUI:'瑞士',CRO:'克罗地亚',SWE:'瑞典',NOR:'挪威',DEN:'丹麦',POL:'波兰',AUT:'奥地利',CZE:'捷克',HUN:'匈牙利',GRE:'希腊',ROU:'罗马尼亚',SRB:'塞尔维亚',TUR:'土耳其',SCO:'苏格兰',WAL:'威尔士',MAR:'摩洛哥',EGY:'埃及',SEN:'塞内加尔',NGA:'尼日利亚',CMR:'喀麦隆',CIV:'科特迪瓦',GHA:'加纳',ALG:'阿尔及利亚',TUN:'突尼斯',CPV:'佛得角',COD:'民主刚果',AUS:'澳大利亚',NZL:'新西兰',KSA:'沙特',IRN:'伊朗',PAR:'巴拉圭'};
+
+const RAW = [
+  // GROUPS
+  {id:'M01',g:'A',h:'MEX',a:'CHN',d:'2026-06-11T22:00:00+08:00',s:'done',sc:{h:0,a:1}},
+  {id:'M02',g:'A',h:'RSA',a:'CPV',d:'2026-06-11T22:00:00+08:00',s:'done',sc:{h:0,a:0}},
+  {id:'M03',g:'B',h:'CAN',a:'HUN',d:'2026-06-12T00:00:00+08:00',s:'done',sc:{h:2,a:1}},
+  {id:'M04',g:'B',h:'CRO',a:'KSA',d:'2026-06-12T00:00:00+08:00',s:'done',sc:{h:0,a:0}},
+  {id:'M05',g:'C',h:'FRA',a:'AUS',d:'2026-06-12T04:00:00+08:00',s:'done',sc:{h:4,a:1}},
+  {id:'M06',g:'C',h:'ECU',a:'KOR',d:'2026-06-12T07:00:00+08:00',s:'done',sc:{h:2,a:0}},
+  {id:'M07',g:'D',h:'DEN',a:'WAL',d:'2026-06-12T08:00:00+08:00',s:'done',sc:{h:0,a:1}},
+  {id:'M08',g:'D',h:'SEN',a:'JPN',d:'2026-06-13T00:00:00+08:00',s:'done',sc:{h:2,a:1}},
+  {id:'M09',g:'E',h:'USA',a:'CMR',d:'2026-06-13T04:00:00+08:00',s:'done',sc:{h:2,a:0}},
+  {id:'M10',g:'E',h:'JAM',a:'TUR',d:'2026-06-13T07:00:00+08:00',s:'done',sc:{h:1,a:2}},
+  {id:'M11',g:'F',h:'GER',a:'TUN',d:'2026-06-13T10:00:00+08:00',s:'done',sc:{h:2,a:0}},
+  {id:'M12',g:'F',h:'SCO',a:'ARG',d:'2026-06-13T11:30:00+08:00',s:'done',sc:{h:0,a:3}},
+  {id:'M13',g:'G',h:'NED',a:'IRQ',d:'2026-06-14T00:00:00+08:00',s:'done',sc:{h:1,a:0}},
+  {id:'M14',g:'G',h:'ENG',a:'MAR',d:'2026-06-14T04:00:00+08:00',s:'done',sc:{h:1,a:1}},
+  {id:'M15',g:'H',h:'POR',a:'BRA',d:'2026-06-14T07:00:00+08:00',s:'done',sc:{h:0,a:0}},
+  {id:'M16',g:'H',h:'ALG',a:'URU',d:'2026-06-14T10:00:00+08:00',s:'done',sc:{h:1,a:1}},
+  {id:'M17',g:'I',h:'ESP',a:'IRN',d:'2026-06-14T11:30:00+08:00',s:'done',sc:{h:3,a:0}},
+  {id:'M18',g:'I',h:'PAR',a:'NGA',d:'2026-06-15T01:00:00+08:00',s:'done',sc:{h:1,a:0}},
+  {id:'M19',g:'J',h:'BEL',a:'POL',d:'2026-06-15T04:00:00+08:00',s:'done',sc:{h:1,a:0}},
+  {id:'M20',g:'J',h:'SUI',a:'ITA',d:'2026-06-15T08:00:00+08:00',s:'done',sc:{h:2,a:1}},
+  {id:'M21',g:'K',h:'COL',a:'CIV',d:'2026-06-15T11:00:00+08:00',s:'done',sc:{h:2,a:1}},
+  {id:'M22',g:'K',h:'SWE',a:'NOR',d:'2026-06-16T00:00:00+08:00',s:'done',sc:{h:0,a:2}},
+  {id:'M23',g:'L',h:'GHA',a:'AUT',d:'2026-06-16T03:00:00+08:00',s:'done',sc:{h:1,a:2}},
+  {id:'M24',g:'L',h:'EGY',a:'NZL',d:'2026-06-16T07:00:00+08:00',s:'done',sc:{h:2,a:0}},
+  // MD2
+  {id:'M25',g:'A',h:'MEX',a:'RSA',d:'2026-06-17T05:00:00+08:00',s:'done',sc:{h:2,a:0}},
+  {id:'M26',g:'A',h:'CHN',a:'CPV',d:'2026-06-17T08:00:00+08:00',s:'done',sc:{h:2,a:1}},
+  {id:'M27',g:'B',h:'CAN',a:'CRO',d:'2026-06-18T02:00:00+08:00',s:'done',sc:{h:2,a:0}},
+  {id:'M28',g:'B',h:'HUN',a:'KSA',d:'2026-06-18T05:00:00+08:00',s:'done',sc:{h:1,a:2}},
+  {id:'M29',g:'C',h:'FRA',a:'ECU',d:'2026-06-18T09:00:00+08:00',s:'done',sc:{h:0,a:0}},
+  {id:'M30',g:'C',h:'AUS',a:'KOR',d:'2026-06-19T02:00:00+08:00',s:'done',sc:{h:0,a:1}},
+  {id:'M31',g:'D',h:'DEN',a:'SEN',d:'2026-06-19T05:00:00+08:00',s:'done',sc:{h:1,a:2}},
+  {id:'M32',g:'D',h:'WAL',a:'JPN',d:'2026-06-19T09:00:00+08:00',s:'done',sc:{h:1,a:1}},
+  {id:'M33',g:'E',h:'USA',a:'JAM',d:'2026-06-20T05:00:00+08:00',s:'done',sc:{h:3,a:1}},
+  {id:'M34',g:'E',h:'CMR',a:'TUR',d:'2026-06-20T08:00:00+08:00',s:'done',sc:{h:0,a:2}},
+  {id:'M35',g:'F',h:'GER',a:'SCO',d:'2026-06-20T11:00:00+08:00',s:'done',sc:{h:1,a:0}},
+  {id:'M36',g:'F',h:'TUN',a:'ARG',d:'2026-06-21T01:00:00+08:00',s:'done',sc:{h:1,a:3}},
+  {id:'M37',g:'G',h:'NED',a:'ENG',d:'2026-06-21T05:00:00+08:00',s:'done',sc:{h:1,a:1}},
+  {id:'M38',g:'G',h:'IRQ',a:'MAR',d:'2026-06-21T09:00:00+08:00',s:'done',sc:{h:0,a:4}},
+  {id:'M39',g:'H',h:'POR',a:'ALG',d:'2026-06-22T03:00:00+08:00',s:'done',sc:{h:1,a:0}},
+  {id:'M40',g:'H',h:'BRA',a:'URU',d:'2026-06-22T07:00:00+08:00',s:'done',sc:{h:2,a:1}},
+  {id:'M41',g:'I',h:'ESP',a:'PAR',d:'2026-06-22T11:00:00+08:00',s:'done',sc:{h:2,a:1}},
+  {id:'M42',g:'I',h:'IRN',a:'NGA',d:'2026-06-23T02:00:00+08:00',s:'done',sc:{h:0,a:0}},
+  {id:'M43',g:'J',h:'BEL',a:'SUI',d:'2026-06-23T05:00:00+08:00',s:'done',sc:{h:1,a:1}},
+  {id:'M44',g:'J',h:'POL',a:'ITA',d:'2026-06-23T09:00:00+08:00',s:'done',sc:{h:2,a:2}},
+  {id:'M45',g:'K',h:'COL',a:'SWE',d:'2026-06-24T03:00:00+08:00',s:'done',sc:{h:1,a:1}},
+  {id:'M46',g:'K',h:'CIV',a:'NOR',d:'2026-06-24T07:00:00+08:00',s:'done',sc:{h:0,a:1}},
+  {id:'M47',g:'L',h:'GHA',a:'EGY',d:'2026-06-24T11:00:00+08:00',s:'done',sc:{h:0,a:2}},
+  {id:'M48',g:'L',h:'AUT',a:'NZL',d:'2026-06-25T02:00:00+08:00',s:'done',sc:{h:3,a:0}},
+  // MD3
+  {id:'M49',g:'A',h:'MEX',a:'CPV',d:'2026-06-25T10:00:00+08:00',s:'done',sc:{h:2,a:0}},
+  {id:'M50',g:'A',h:'CHN',a:'RSA',d:'2026-06-25T10:00:00+08:00',s:'done',sc:{h:2,a:1}},
+  {id:'M51',g:'B',h:'CAN',a:'KSA',d:'2026-06-26T03:00:00+08:00',s:'done',sc:{h:4,a:1}},
+  {id:'M52',g:'B',h:'HUN',a:'CRO',d:'2026-06-26T03:00:00+08:00',s:'done',sc:{h:2,a:1}},
+  {id:'M53',g:'C',h:'FRA',a:'KOR',d:'2026-06-26T05:00:00+08:00',s:'done',sc:{h:1,a:0}},
+  {id:'M54',g:'C',h:'AUS',a:'ECU',d:'2026-06-26T05:00:00+08:00',s:'done',sc:{h:0,a:1}},
+  {id:'M55',g:'D',h:'DEN',a:'JPN',d:'2026-06-27T01:00:00+08:00',s:'done',sc:{h:2,a:2}},
+  {id:'M56',g:'D',h:'WAL',a:'SEN',d:'2026-06-27T01:00:00+08:00',s:'done',sc:{h:1,a:0}},
+  {id:'M57',g:'E',h:'USA',a:'TUR',d:'2026-06-27T04:00:00+08:00',s:'done',sc:{h:2,a:1}},
+  {id:'M58',g:'E',h:'CMR',a:'JAM',d:'2026-06-27T04:00:00+08:00',s:'done',sc:{h:0,a:1}},
+  {id:'M59',g:'F',h:'GER',a:'ARG',d:'2026-06-27T09:00:00+08:00',s:'done',sc:{h:2,a:1}},
+  {id:'M60',g:'F',h:'TUN',a:'SCO',d:'2026-06-27T09:00:00+08:00',s:'done',sc:{h:1,a:0}},
+  {id:'M61',g:'G',h:'NED',a:'MAR',d:'2026-06-28T03:00:00+08:00',s:'done',sc:{h:1,a:1}},
+  {id:'M62',g:'G',h:'IRQ',a:'ENG',d:'2026-06-28T03:00:00+08:00',s:'done',sc:{h:0,a:3}},
+  {id:'M63',g:'H',h:'POR',a:'URU',d:'2026-06-28T09:00:00+08:00',s:'done',sc:{h:2,a:1}},
+  {id:'M64',g:'H',h:'BRA',a:'ALG',d:'2026-06-28T09:00:00+08:00',s:'done',sc:{h:3,a:0}},
+  {id:'M65',g:'I',h:'ESP',a:'NGA',d:'2026-06-29T01:00:00+08:00',s:'done',sc:{h:4,a:0}},
+  {id:'M66',g:'I',h:'IRN',a:'PAR',d:'2026-06-29T01:00:00+08:00',s:'done',sc:{h:1,a:2}},
+  {id:'M67',g:'J',h:'BEL',a:'ITA',d:'2026-06-29T07:00:00+08:00',s:'done',sc:{h:2,a:0}},
+  {id:'M68',g:'J',h:'POL',a:'SUI',d:'2026-06-29T07:00:00+08:00',s:'done',sc:{h:3,a:2}},
+  {id:'M69',g:'K',h:'COL',a:'NOR',d:'2026-06-29T11:00:00+08:00',s:'done',sc:{h:2,a:1}},
+  {id:'M70',g:'K',h:'CIV',a:'SWE',d:'2026-06-29T11:00:00+08:00',s:'done',sc:{h:2,a:1}},
+  {id:'M71',g:'L',h:'GHA',a:'NZL',d:'2026-06-30T02:00:00+08:00',s:'done',sc:{h:2,a:2}},
+  {id:'M72',g:'L',h:'AUT',a:'EGY',d:'2026-06-30T02:00:00+08:00',s:'done',sc:{h:1,a:2}},
+  // R32
+  {id:'R01',st:'R32',h:'RSA',a:'CAN',d:'2026-06-29T03:00:00+08:00',s:'done',sc:{h:0,a:1}},
+  {id:'R02',st:'R32',h:'BRA',a:'JPN',d:'2026-06-30T01:00:00+08:00',s:'done',sc:{h:2,a:1}},
+  {id:'R03',st:'R32',h:'GER',a:'PAR',d:'2026-06-30T04:30:00+08:00',s:'done',sc:{h:1,a:1,hp:3,ap:4}},
+  {id:'R04',st:'R32',h:'NED',a:'MAR',d:'2026-06-30T09:00:00+08:00',s:'done',sc:{h:1,a:1,hp:2,ap:3}},
+  {id:'R05',st:'R32',h:'CIV',a:'NOR',d:'2026-07-01T01:00:00+08:00',s:'done',sc:{h:1,a:2}},
+  {id:'R06',st:'R32',h:'FRA',a:'SWE',d:'2026-07-01T05:00:00+08:00',s:'done',sc:{h:3,a:0}},
+  {id:'R07',st:'R32',h:'MEX',a:'ECU',d:'2026-07-01T10:00:00+08:00',s:'done',sc:{h:2,a:0}},
+  {id:'R08',st:'R32',h:'ENG',a:'COD',d:'2026-07-02T00:00:00+08:00',s:'done',sc:{h:2,a:1}},
+  {id:'R09',st:'R32',h:'BEL',a:'SEN',d:'2026-07-02T04:00:00+08:00',s:'done',sc:{h:3,a:2}},
+  {id:'R10',st:'R32',h:'USA',a:'BIH',d:'2026-07-02T08:00:00+08:00',s:'done',sc:{h:2,a:0}},
+  {id:'R11',st:'R32',h:'ESP',a:'AUT',d:'2026-07-03T03:00:00+08:00',s:'done',sc:{h:3,a:0}},
+  {id:'R12',st:'R32',h:'POR',a:'CRO',d:'2026-07-03T07:00:00+08:00',s:'done',sc:{h:2,a:1}},
+  {id:'R13',st:'R32',h:'SUI',a:'ALG',d:'2026-07-03T11:00:00+08:00',s:'done',sc:{h:2,a:0}},
+  {id:'R14',st:'R32',h:'AUS',a:'EGY',d:'2026-07-04T02:00:00+08:00',s:'done',sc:{h:3,a:5}},
+  {id:'R15',st:'R32',h:'ARG',a:'CPV',d:'2026-07-04T06:00:00+08:00',s:'done',sc:{h:3,a:2}},
+  {id:'R16',st:'R32',h:'COL',a:'GHA',d:'2026-07-04T09:30:00+08:00',s:'done',sc:{h:1,a:0}},
+  // R16
+  {id:'R17',st:'R16',h:'CAN',a:'MAR',d:'2026-07-05T01:00:00+08:00',s:'done',sc:{h:0,a:3}},
+  {id:'R18',st:'R16',h:'PAR',a:'FRA',d:'2026-07-05T05:00:00+08:00',s:'done',sc:{h:0,a:1}},
+  {id:'R19',st:'R16',h:'BRA',a:'NOR',d:'2026-07-06T04:00:00+08:00',s:'upcoming',sc:{h:null,a:null}},
+  {id:'R20',st:'R16',h:'MEX',a:'ENG',d:'2026-07-06T08:00:00+08:00',s:'upcoming',sc:{h:null,a:null}},
+  {id:'R21',st:'R16',h:'ESP',a:'POR',d:'2026-07-07T03:00:00+08:00',s:'upcoming',sc:{h:null,a:null}},
+  {id:'R22',st:'R16',h:'USA',a:'BEL',d:'2026-07-07T08:00:00+08:00',s:'upcoming',sc:{h:null,a:null}},
+  {id:'R23',st:'R16',h:'ARG',a:'EGY',d:'2026-07-08T00:00:00+08:00',s:'upcoming',sc:{h:null,a:null}},
+  {id:'R24',st:'R16',h:'SUI',a:'COL',d:'2026-07-08T04:00:00+08:00',s:'upcoming',sc:{h:null,a:null}},
+  // QF
+  {id:'QF1',st:'QF',h:'MAR',a:'FRA',d:'2026-07-10T04:00:00+08:00',s:'upcoming',sc:{h:null,a:null}},
+  {id:'QF2',st:'QF',h:'ESP',a:'USA',d:'2026-07-11T03:00:00+08:00',s:'upcoming',sc:{h:null,a:null}},
+  {id:'QF3',st:'QF',h:'BRA',a:'MEX',d:'2026-07-12T05:00:00+08:00',s:'upcoming',sc:{h:null,a:null}},
+  {id:'QF4',st:'QF',h:'ARG',a:'SUI',d:'2026-07-12T09:00:00+08:00',s:'upcoming',sc:{h:null,a:null}},
+  // SF
+  {id:'SF1',st:'SF',h:'TBD',a:'TBD',d:'2026-07-15T05:00:00+08:00',s:'upcoming',sc:{h:null,a:null}},
+  {id:'SF2',st:'SF',h:'TBD',a:'TBD',d:'2026-07-16T05:00:00+08:00',s:'upcoming',sc:{h:null,a:null}},
+  // 3RD
+  {id:'3RD',st:'3RD',h:'TBD',a:'TBD',d:'2026-07-18T22:00:00+08:00',s:'upcoming',sc:{h:null,a:null}},
+  // FINAL
+  {id:'FIN',st:'FINAL',h:'TBD',a:'TBD',d:'2026-07-20T03:00:00+08:00',s:'upcoming',sc:{h:null,a:null}}
+];
+
+const MM = RAW.map(m => ({
+  ...m,
+  dt: new Date(m.d),
+  _g: m.g ? m.g.toUpperCase() : '',
+  _st: m.st || 'group'
+}));
+MM.sort((a,b) => a.dt - b.dt);
+
+function fi(c) {
+  if (!c || c==='TBD') return '';
+  const x = CC[c]; return x ? '<img src="https://flagcdn.com/16x12/'+x+'.png" alt="" style="vertical-align:middle;margin-right:2px;" onerror="this.style.display=\'none\'">' : '';
+}
+function tx(c) { return (!c||c==='TBD')?'待定':(TN[c]||c); }
+function ds(dt) { return (dt.getMonth()+1)+'/'+dt.getDate()+' '+String(dt.getHours()).padStart(2,'0')+':'+String(dt.getMinutes()).padStart(2,'0'); }
+
+function bm(m, cls) {
+  let c = 'bm'; if (cls) c+=' '+cls; if (m.s==='live') c+=' live'; if (m.s==='done') c+=' done';
+  const num = m.id||'';
+  const dstr = ds(m.dt);
+  let hl, al;
+  if (m.s==='done'&&m.sc) {
+    const hs=+m.sc.h||0, as=+m.sc.a||0;
+    hl = hs>as?'<span class="bp w1">胜</span>':hs<as?'<span class="bp l1">负</span>':'<span class="bp dr">平</span>';
+    al = as>hs?'<span class="bp w1">胜</span>':as<hs?'<span class="bp l1">负</span>':'<span class="bp dr">平</span>';
+  } else { hl='<span class="bp dr">-</span>'; al='<span class="bp dr">-</span>'; }
+  let hs = (m.s==='done'&&m.sc)?(m.sc.hp!=null?m.sc.h+'('+m.sc.hp+')':m.sc.h):(m.s==='live'&&m.sc?m.sc.h:'-');
+  let as = (m.s==='done'&&m.sc)?(m.sc.ap!=null?m.sc.a+'('+m.sc.ap+')':m.sc.a):(m.s==='live'&&m.sc?m.sc.a:'-');
+  const hw = (m.s==='done'&&m.sc&&+m.sc.h>+m.sc.a)?' w':'';
+  const aw = (m.s==='done'&&m.sc&&+m.sc.a>+m.sc.h)?' w':'';
+  return '<div class="'+c+'">'+
+    '<div class="bm-hdr"><span class="bm-n">'+num+'</span><span class="bm-t">'+dstr+'</span></div>'+
+    '<div class="bm-r">'+hl+'<span class="bt">'+fi(m.h)+tx(m.h)+'</span><span class="bs'+hw+'">'+hs+'</span></div>'+
+    '<div class="bm-r">'+al+'<span class="bt">'+fi(m.a)+tx(m.a)+'</span><span class="bs'+aw+'">'+as+'</span></div>'+
+    '</div>';
+}
+
+function gc(g, teams) {
+  let h = '<div class="gc"><div class="gc-hdr">Group '+g+'</div>';
+  for (let j=0;j<4;j++) {
+    const t = teams[j];
+    const adv = j<2;
+    if (t) {
+      h += '<div class="gc-r">'+
+        '<span class="gc-i">'+(j+1)+'</span>'+
+        '<span class="gc-t">'+fi(t.c)+tx(t.c)+'</span>'+
+        '<span class="gc-s">'+t.w+'-'+t.d+'-'+t.l+'</span>'+
+        '<span class="gc-p">'+t.p+'</span></div>';
+    } else {
+      h += '<div class="gc-r"><span class="gc-i">'+(j+1)+'</span><span class="gc-t" style="color:#445">—</span><span class="gc-s">-</span><span class="gc-p">-</span></div>';
+    }
+  }
+  h += '</div>';
+  return h;
+}
+
+function standings() {
+  const g={};
+  for (const m of MM) {
+    if (m._st!=='group'||m.h==='TBD') continue;
+    const gg=m.g||''; if(!gg) continue;
+    if(!g[gg]) g[gg]={};
+    if(!g[gg][m.h]) g[gg][m.h]={mp:0,w:0,d:0,l:0,gf:0,ga:0,p:0};
+    if(!g[gg][m.a]) g[gg][m.a]={mp:0,w:0,d:0,l:0,gf:0,ga:0,p:0};
+    if(m.s==='done'&&m.sc) {
+      const hs=+m.sc.h||0, as=+m.sc.a||0;
+      g[gg][m.h].mp++; g[gg][m.a].mp++;
+      g[gg][m.h].gf+=hs; g[gg][m.h].ga+=as;
+      g[gg][m.a].gf+=as; g[gg][m.a].ga+=hs;
+      const pen=m.sc.hp!=null;
+      if(hs>as){g[gg][m.h].w++;g[gg][m.h].p+=3;g[gg][m.a].l++;}
+      else if(hs<as){g[gg][m.a].w++;g[gg][m.a].p+=3;g[gg][m.h].l++;}
+      else if(pen){
+        g[gg][m.h].d++;g[gg][m.a].d++;g[gg][m.h].p++;g[gg][m.a].p++;
+        if(m.sc.hp>m.sc.ap){g[gg][m.h].w++;g[gg][m.h].p+=2;g[gg][m.a].l++;}
+        else{g[gg][m.a].w++;g[gg][m.a].p+=2;g[gg][m.h].l++;}
+      }else{g[gg][m.h].d++;g[gg][m.a].d++;g[gg][m.h].p++;g[gg][m.a].p++;}
+    }
+  }
+  const r={};
+  for(const gg of Object.keys(g)){
+    const ts=Object.keys(g[gg]).map(c=>({...g[gg][c],c,gd:g[gg][c].gf-g[gg][c].ga}));
+    ts.sort((a,b)=>b.p-a.p||b.gd-a.gd||b.gf-a.gf);
+    r[gg]=ts;
+  }
+  return r;
+}
+
+function updateMatchStatuses() {
+  const now = new Date();
+  for (const m of MM) {
+    if (m.s === 'done') continue;
+    const isKO = m._st && ['R32','R16','QF','SF','3RD','FINAL'].includes(m._st);
+    const endTime = new Date(m.dt.getTime() + (isKO ? 180 : 165) * 60000);
+    if (now < m.dt) m.s = 'upcoming';
+    else if (now < endTime) m.s = 'live';
+    else m.s = 'done';
+  }
+}
+
+function champRes() {
+  let fin=null, thr=null;
+  for(const m of MM){if(m._st==='FINAL')fin=m;if(m._st==='3RD')thr=m;}
+  const ranks=[
+    {e:'🥇',t:null,gold:true},{e:'🥈',t:null},{e:'🥉',t:null},{e:'4️⃣',t:null,tbd:true}
+  ];
+  if(fin&&fin.s==='done'&&fin.sc){
+    const hs=+fin.sc.h||0,as=+fin.sc.a||0;
+    if(hs>as){ranks[0].t=fin.h;ranks[1].t=fin.a;}
+    else if(as>hs){ranks[0].t=fin.a;ranks[1].t=fin.h;}
+  }
+  if(thr&&thr.s==='done'&&thr.sc){
+    const hs=+thr.sc.h||0,as=+thr.sc.a||0;
+    if(hs>as){ranks[2].t=thr.h;ranks[3].t=thr.a;}
+    else if(as>hs){ranks[3].t=thr.h;ranks[2].t=thr.a;}
+  }
+  let h='<div class="champ-wrap">';
+  for(const r of ranks){
+    const cls='champ'+(r.gold?' gold':'')+(r.tbd?' tbd':'');
+    const disp=r.t?fi(r.t)+tx(r.t):'<span style="color:#445">待定</span>';
+    h+='<div class="'+cls+'"><span class="ci">'+r.e+'</span><span class="ct">'+disp+'</span></div>';
+  }
+  h+='</div>';
+  return h;
+}
+
+function build() {
+  updateMatchStatuses();
+  const r32=[],r16=[],qf=[],sf=[];
+  let fin=null,thr=null;
+  for(const m of MM){
+    const st=m._st;
+    if(!st||st==='group')continue;
+    if(st==='R32')r32.push(m);
+    else if(st==='R16')r16.push(m);
+    else if(st==='QF')qf.push(m);
+    else if(st==='SF')sf.push(m);
+    else if(st==='FINAL')fin=m;
+    else if(st==='3RD')thr=m;
+  }
+  const r32u=r32.slice(0,8),r32l=r32.slice(8,16);
+  const st=standings();
+
+  // Build grid HTML
+  // Row 1: labels (10 cells)
+  // Row 2: content  (10 cells)
+  // Groups span cols 1-3 (split into 3 sub-flex), R32U=col4, R32L=col5, R16=col6, QF=col7, SF=col8, 3RD=col9, Final+champ=col10
+  let h='';
+
+  // ── LABELS ROW (wrapped in lbl-row so ::before can inject R32 merged header) ──
+  h+='<div class="lbl-row">';  // ::before on this injects the "16分之一决赛" banner
+  h+='<div class="lbl" style="border-left:none;">小组 A-D</div>';
+  h+='<div class="lbl"><span class="lbl-sub">小组 E-H</span></div>';
+  h+='<div class="lbl"><span class="lbl-sub">小组 I-L</span></div>';
+  h+='<div class="lbl"><span class="lbl-sub">上半区<br>R32</span></div>';
+  h+='<div class="lbl"><span class="lbl-sub">下半区<br>R32</span></div>';
+  h+='<div class="lbl">1/8决赛<br>R16</div>';
+  h+='<div class="lbl">1/4决赛<br>QF</div>';
+  h+='<div class="lbl">半决赛<br>SF</div>';
+  h+='<div class="lbl">季军赛<br>3rd</div>';
+  h+='<div class="lbl">🏆 决赛<br>Final</div>';
+  h+='<div class="lbl">🏅 名次<br>Ranks</div>';
+  h+='</div>';
+
+  // ── CONTENT ROW ──
+  // Groups A-D
+  h+='<div class="col-g"><div class="g-sub">';
+  for(const g of['A','B','C','D']) h+=gc(g,st[g]||[]);
+  h+='</div></div>';
+  // Groups E-H
+  h+='<div class="col-g"><div class="g-sub">';
+  for(const g of['E','F','G','H']) h+=gc(g,st[g]||[]);
+  h+='</div></div>';
+  // Groups I-L
+  h+='<div class="col-g"><div class="g-sub">';
+  for(const g of['I','J','K','L']) h+=gc(g,st[g]||[]);
+  h+='</div></div>';
+  // R32 Upper
+  h+='<div class="col-ko"><div class="g-sub">';
+  for(const m of r32u) h+=bm(m);
+  h+='</div></div>';
+  // R32 Lower
+  h+='<div class="col-ko"><div class="g-sub">';
+  for(const m of r32l) h+=bm(m);
+  h+='</div></div>';
+  // R16
+  h+='<div class="col-ko"><div class="g-sub">';
+  for(const m of r16) h+=bm(m);
+  h+='</div></div>';
+  // QF
+  h+='<div class="col-ko"><div class="g-sub">';
+  for(const m of qf) h+=bm(m);
+  h+='</div></div>';
+  // SF
+  h+='<div class="col-ko"><div class="g-sub">';
+  for(const m of sf) h+=bm(m);
+  h+='</div></div>';
+  // 3RD
+  h+='<div class="col-ko">';
+  if(thr) h+=bm(thr);
+  h+='</div>';
+  // Final (no champions here – separated out)
+  h+='<div class="col-ko">';
+  if(fin) h+=bm(fin,'final');
+  h+='</div>';
+  // Champions (col 11 – right of Final)
+  h+='<div class="col-champ">';
+  h+=champRes();
+  h+='</div>';
+
+  document.getElementById('bracketRoot').innerHTML = h;
+}
+
+document.addEventListener('DOMContentLoaded', build);
+</script>
+</body>
+</html>
