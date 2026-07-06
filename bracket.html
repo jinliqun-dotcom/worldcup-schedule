@@ -69,14 +69,14 @@ header {
 
 /* ── R32 merged header (spans col 4–5 via ::before on .lbl-row) ── */
 /* Col widths for reference (must match grid-template-columns below):
-   1:108px  2:108px  3:108px  4:126px  5:126px  6:118px  7:96px  8:84px  9:88px  10:130px  11:120px */
+   1:108px  2:108px  3:108px  4:128px  5:128px  6:130px  7:110px  8:100px  9:100px  10:130px  11:120px */
 
 /* CSS Grid: 11 columns (champions moved to col 11) */
 .bracket-grid {
   display: grid;
   /* Groups   Groups   Groups   R32U   R32L   R16   QF   SF   3RD  Final  Champ */
   grid-template-columns:
-    108px     108px    108px    126px  126px  118px  96px  84px  88px  130px  120px;
+    108px     108px    108px    128px  128px  130px  110px  100px  100px  130px  120px;
   grid-template-rows: 30px auto;
   gap: 0;
   align-items: start;
@@ -96,8 +96,8 @@ header {
   font-weight: 700;
   color: #c78a08;            /* ── same as .lbl ── */
   letter-spacing: 0.05em;
-  /* col4=126px + col5=126px = 252px */
-  width: 252px;
+  /* col4=128px + col5=128px = 256px */
+  width: 256px;
   height: 28px;
   /* ── no border, no background – consistent with .lbl ── */
   /* col1(108)+col2(108)+col3(108)=324px offset to land on col4 */
@@ -180,7 +180,7 @@ header {
   transition: border-color 0.2s;
   flex-shrink: 0;
   /* Fixed height keeps all cards same size in each column */
-  height: 62px;
+  height: 68px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -203,7 +203,13 @@ header {
   margin-bottom: 2px;
 }
 .bm-n { font-size: 0.72em; color: #4a6d99; min-width: 44px; flex-shrink: 0; }
-.bm-t { font-size: 0.68em; color: #5a7a9a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bm-t {
+  font-size: 0.68em;
+  color: #5a7a9a;
+  white-space: normal;
+  overflow: visible;
+  line-height: 1.2;
+}
 
 .bm-r { display: flex; align-items: center; gap: 2px; margin: 1px 0; }
 .bp { font-size: 0.72em; min-width: 16px; text-align: center; flex-shrink: 0; }
@@ -222,7 +228,7 @@ header {
   border: 1px solid #1a2434;
   border-radius: 3px;
   flex-shrink: 0;
-  height: 62px;
+  height: 68px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -237,7 +243,7 @@ header {
 }
 .gc-r { display:flex; gap:2px; align-items:center; font-size:0.68em; padding:0 2px; }
 .gc-i { font-size:0.8em; color:#4a6d99; min-width:12px; flex-shrink:0; }
-.gc-t { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.gc-t { flex:1; min-width:0; overflow:visible; white-space:normal; line-height:1.2; }
 .gc-t img { vertical-align:middle; margin-right:2px; }
 .gc-s { font-size:0.8em; color:#5a7a9a; flex-shrink:0; }
 .gc-p { font-size:0.8em; font-weight:700; color:#4da6ff; min-width:18px; text-align:right; flex-shrink:0; }
