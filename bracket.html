@@ -77,36 +77,18 @@ header {
   /* Groups   Groups   Groups   R32U   R32L   R16   QF   SF   3RD  Final  Champ */
   grid-template-columns:
     108px     108px    108px    128px  128px  130px  110px  100px  100px  130px  120px;
-  grid-template-rows: 30px auto;
+  grid-template-rows: 28px 28px auto;
   gap: 0;
   align-items: start;
   position: relative;   /* needed for .lbl-row ::before positioning */
 }
 
-/* ── R32 merged header injected via ::before ── */
+/* ── Label rows ── */
 .lbl-row {
   display: contents;  /* children are grid items */
 }
-.lbl-row::before {
-  content: '16分之一决赛 · Round of 32';
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.68em;
-  font-weight: 700;
-  color: #c78a08;            /* ── same as .lbl ── */
-  letter-spacing: 0.05em;
-  /* col4=128px + col5=128px = 256px */
-  width: 256px;
-  height: 28px;
-  /* ── no border, no background – consistent with .lbl ── */
-  /* col1(108)+col2(108)+col3(108)=324px offset to land on col4 */
-  margin-left: 324px;
-  box-sizing: border-box;
-  grid-column: 1;   /* dummy – doesn't affect flex layout below */
-  position: absolute;
-  top: 1px;
-  z-index: 2;
+.lbl-merge {
+  grid-column: span 2;
 }
 
 /* ── Label row ── */
@@ -574,19 +556,33 @@ function build() {
   // Groups span cols 1-3 (split into 3 sub-flex), R32U=col4, R32L=col5, R16=col6, QF=col7, SF=col8, 3RD=col9, Final+champ=col10
   let h='';
 
-  // ── LABELS ROW (wrapped in lbl-row so ::before can inject R32 merged header) ──
-  h+='<div class="lbl-row">';  // ::before on this injects the "16分之一决赛" banner
+  // ── LABELS ROWS ──
+  // Row 1: main headers
+  h+='<div class="lbl-row">';
   h+='<div class="lbl" style="border-left:none;">小组 A-D</div>';
   h+='<div class="lbl">小组 E-H</div>';
   h+='<div class="lbl">小组 I-L</div>';
-  h+='<div class="lbl"><span class="lbl-sub">上半区<br>R32</span></div>';
-  h+='<div class="lbl"><span class="lbl-sub">下半区<br>R32</span></div>';
+  h+='<div class="lbl lbl-merge">16分之一决赛</div>';
   h+='<div class="lbl">1/8决赛<br>R16</div>';
   h+='<div class="lbl">1/4决赛<br>QF</div>';
   h+='<div class="lbl">半决赛<br>SF</div>';
-  h+='<div class="lbl">季军赛<br>3rd</div>';
-  h+='<div class="lbl">🏆 决赛<br>Final</div>';
-  h+='<div class="lbl">🏅 名次<br>Ranks</div>';
+  h+='<div class="lbl">季军赛<br>3RD</div>';
+  h+='<div class="lbl">🏆 决赛<br>FINAL</div>';
+  h+='<div class="lbl">🏅 名次<br>RANKS</div>';
+  h+='</div>';
+  // Row 2: sub-headers for R32
+  h+='<div class="lbl-row">';
+  h+='<div class="lbl" style="border-left:none;visibility:hidden;"></div>';
+  h+='<div class="lbl" style="visibility:hidden;"></div>';
+  h+='<div class="lbl" style="visibility:hidden;"></div>';
+  h+='<div class="lbl">上半区</div>';
+  h+='<div class="lbl">下半区</div>';
+  h+='<div class="lbl" style="visibility:hidden;"></div>';
+  h+='<div class="lbl" style="visibility:hidden;"></div>';
+  h+='<div class="lbl" style="visibility:hidden;"></div>';
+  h+='<div class="lbl" style="visibility:hidden;"></div>';
+  h+='<div class="lbl" style="visibility:hidden;"></div>';
+  h+='<div class="lbl" style="visibility:hidden;"></div>';
   h+='</div>';
 
   // ── CONTENT ROW ──
