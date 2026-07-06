@@ -126,7 +126,7 @@ header {
   white-space: nowrap;
 }
 .lbl-sub {
-  font-size: 0.6em;
+  font-size: 0.68em;
   font-weight: 700;
   color: #c78a08;            /* same family, slightly dimmer */
   text-transform: uppercase;
@@ -576,7 +576,7 @@ function build() {
 
   // ── LABELS ROW (wrapped in lbl-row so ::before can inject R32 merged header) ──
   h+='<div class="lbl-row">';  // ::before on this injects the "16分之一决赛" banner
-  h+='<div class="lbl" style="border-left:none;">小组 A-D</div>';
+  h+='<div class="lbl" style="border-left:none;"><span class="lbl-sub">小组 A-D</span></div>';
   h+='<div class="lbl"><span class="lbl-sub">小组 E-H</span></div>';
   h+='<div class="lbl"><span class="lbl-sub">小组 I-L</span></div>';
   h+='<div class="lbl"><span class="lbl-sub">上半区<br>R32</span></div>';
