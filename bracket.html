@@ -511,7 +511,7 @@ function champRes() {
   let fin=null, thr=null;
   for(const m of MM){if(m._st==='FINAL')fin=m;if(m._st==='3RD')thr=m;}
   const ranks=[
-    {e:'🥇',t:null,gold:true},{e:'🥈',t:null},{e:'🥉',t:null},{e:'4️⃣',t:null,tbd:true}
+    {e:'🥇',t:null,gold:true},{e:'🥈',t:null},{e:'🥉',t:null}
   ];
   if(fin&&fin.s==='done'&&fin.sc){
     const hs=+fin.sc.h||0,as=+fin.sc.a||0;
@@ -520,8 +520,8 @@ function champRes() {
   }
   if(thr&&thr.s==='done'&&thr.sc){
     const hs=+thr.sc.h||0,as=+thr.sc.a||0;
-    if(hs>as){ranks[2].t=thr.h;ranks[3].t=thr.a;}
-    else if(as>hs){ranks[3].t=thr.h;ranks[2].t=thr.a;}
+    if(hs>as){ranks[2].t=thr.h;}
+    else if(as>hs){ranks[2].t=thr.a;}
   }
   let h='<div class="champ-wrap">';
   for(const r of ranks){
