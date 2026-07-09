@@ -192,6 +192,7 @@ header {
   overflow: visible;
   line-height: 1.2;
 }
+.bj-note { font-size: 0.6em; color: #c78a08; }
 
 .bm-r { display: flex; align-items: center; gap: 2px; margin: 1px 0; }
 .bp { font-size: 0.72em; min-width: 16px; text-align: center; flex-shrink: 0; }
@@ -422,11 +423,15 @@ function fi(c) {
 }
 function tx(c) { return (!c||c==='TBD')?'待定':(TN[c]||c); }
 function ds(dt) { return (dt.getMonth()+1)+'/'+dt.getDate()+' '+String(dt.getHours()).padStart(2,'0')+':'+String(dt.getMinutes()).padStart(2,'0'); }
+function bjLabel(d) {
+  if (!d) return '';
+  return (+d.slice(5,7)) + '/' + (+d.slice(8,10)) + ' ' + d.slice(11,13) + ':' + d.slice(14,16);
+}
 
 function bm(m, cls) {
   let c = 'bm'; if (cls) c+=' '+cls; if (m.s==='live') c+=' live'; if (m.s==='done') c+=' done';
   const num = m.id||'';
-  const dstr = ds(m.dt);
+  const dstr = ds(m.dt) + ' <span class="bj-note">(北京时间 ' + bjLabel(m.d) + ')</span>';
   let hl, al;
   if (m.s==='done'&&m.sc) {
     const hs=+m.sc.h||0, as=+m.sc.a||0;
