@@ -164,6 +164,7 @@ header {
 .match-card .score .minute { font-size:11px; color:var(--live); display:block; letter-spacing:0; margin-top:2px; }
 .match-card .info { text-align:center; font-size:13px; color:var(--text-dim); min-width:100px; }
 .match-card .info .time { font-size:22px; font-weight:700; color:var(--text); }
+.bj-note { font-size:12px; color:var(--accent); font-weight:500; opacity:0.85; }
 .match-card .info .venue { font-size:12px; margin-top:3px; opacity:0.7; }
 .match-card .info .countdown { font-size:15px; color:var(--accent); margin-top:5px; font-weight:700; }
 .match-card .info .group { font-size:11px; background:#e8ecf0; padding:3px 10px; border-radius:4px; font-weight:600; }
@@ -931,6 +932,17 @@ function fmtTime(d) {
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+// Beijing time labels parsed directly from dateBJ string (no timezone conversion).
+// dateBJ format: 'YYYY-MM-DDTHH:MM:SS+08:00'
+function bjDateLabel(dateBJ) {
+  if (!dateBJ) return '';
+  return (+dateBJ.slice(5,7)) + '月' + (+dateBJ.slice(8,10)) + '日';
+}
+function bjTimeLabel(dateBJ) {
+  if (!dateBJ) return '';
+  return dateBJ.slice(11,13) + ':' + dateBJ.slice(14,16);
+}
+
 function getCountdown(d) {
   const now = new Date();
   const diff = d - now;
@@ -1104,7 +1116,7 @@ function render() {
       const dayMatches = finGrouped[dk];
       dayMatches.sort((a, b) => a.date - b.date);
       const dateObj = new Date(dk + 'T00:00:00+08:00');
-      html += '<div class="date-header">' + fmtDate(dateObj) + ' · ' + dayMatches.length + ' 场比赛（已结束）</div>';
+      html += '<div class="date-header">' + fmtDate(dateObj) + ' · ' + dayMatches.length + ' 场比赛（已结束） (北京时间 ' + bjDateLabel(dayMatches[0].dateBJ) + ')</div>';
       html += '<div class="match-grid">';
       for (let m of dayMatches) {
         const cardClass = 'done';
@@ -1114,7 +1126,7 @@ function render() {
         const penHome = m.score.homePen != null ? '(' + m.score.homePen + ')' : '';
         const penAway = m.score.awayPen != null ? '(' + m.score.awayPen + ')' : '';
         let scoreHtml = '<div class="score">' + homeScore + penHome + ' : ' + awayScore + penAway + '</div>';
-        let infoHtml = '<div class="info"><span class="group">' + (m.group ? 'G' + m.group : m._stage) + '</span><div class="time" style="color:var(--text-dim)">' + fmtTime(m.date) + '</div><div class="venue">已结束 · <a href="' + getReplayUrl(m) + '" target="_blank" rel="noopener" style="color:var(--accent2);text-decoration:none;">🎬 回放</a></div></div>';
+        let infoHtml = '<div class="info"><span class="group">' + (m.group ? 'G' + m.group : m._stage) + '</span><div class="time" style="color:var(--text-dim)">' + fmtTime(m.date) + ' <span class="bj-note">(北京时间 ' + bjTimeLabel(m.dateBJ) + ')</span></div><div class="venue">已结束 · <a href="' + getReplayUrl(m) + '" target="_blank" rel="noopener" style="color:var(--accent2);text-decoration:none;">🎬 回放</a></div></div>';
         html += '<div class="match-card ' + cardClass + '" id="card-' + m.id + '"><div class="team">' + (m.home === 'TBD' ? '<span class="flag flag-na">❓</span>' : '<img class="flag" src="https://flagcdn.com/w40/' + COUNTRY_CODES[m.home] + '.png" alt="' + TEAM_NAMES[m.home] + '" loading="lazy">') + '<span class="name">' + (m.home === 'TBD' ? '待定' : TEAM_NAMES[m.home]) + '</span></div>' + scoreHtml + '<div class="team">' + (m.away === 'TBD' ? '<span class="flag flag-na">❓</span>' : '<img class="flag" src="https://flagcdn.com/w40/' + COUNTRY_CODES[m.away] + '.png" alt="' + TEAM_NAMES[m.away] + '" loading="lazy">') + '<span class="name">' + (m.away === 'TBD' ? '待定' : TEAM_NAMES[m.away]) + '</span></div>' + infoHtml + '</div>';
       }
       html += '</div>';
@@ -1129,7 +1141,7 @@ function render() {
     // 按比赛时间排序，确保同一天内比赛按时间先后展示
     dayMatches.sort((a, b) => a.date - b.date);
     const dateObj = new Date(dk + 'T00:00:00+08:00');
-    html += `<div class="date-header">📅 ${fmtDate(dateObj)} · ${dayMatches.length}场比赛</div>`;
+    html += `<div class="date-header">📅 ${fmtDate(dateObj)} · ${dayMatches.length}场比赛 (北京时间 ${bjDateLabel(dayMatches[0].dateBJ)})</div>`;
     html += '<div class="match-grid">';
 
     for (let m of dayMatches) {
@@ -1157,13 +1169,13 @@ function render() {
       if (done) {
         infoHtml = `<div class="info">
           <span class="group">${m.group ? 'G' + m.group : m._stage}</span>
-          <div class="time" style="color:var(--text-dim)">${fmtTime(m.date)}</div>
+          <div class="time" style="color:var(--text-dim)">${fmtTime(m.date)} <span class="bj-note">(北京时间 ${bjTimeLabel(m.dateBJ)})</span></div>
           <div class="venue">已结束 · <a href="${getReplayUrl(m)}" target="_blank" rel="noopener" style="color:var(--accent2);text-decoration:none;">🎬 回放</a></div>
         </div>`;
       } else {
         infoHtml = `<div class="info">
           <span class="group">${m.group ? 'G' + m.group : m._stage}</span>
-          <div class="time">${fmtTime(m.date)}</div>
+          <div class="time">${fmtTime(m.date)} <span class="bj-note">(北京时间 ${bjTimeLabel(m.dateBJ)})</span></div>
           <div class="countdown">${live ? '🔴 进行中' : getCountdown(m.date)}</div>
           <div class="venue">${venueName(m.venue)}</div>
         </div>`;
