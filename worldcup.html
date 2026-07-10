@@ -907,7 +907,13 @@ const RAW_MATCHES = [
 const MATCHES = RAW_MATCHES.map(m => ({
   ...m,
   date: new Date(m.dateBJ),
-  _stage: m.stage || 'group'
+  _stage: m.stage || 'group',
+  _bjDate: m.dateBJ.slice(0,10),
+  _bjMonth: +m.dateBJ.slice(5,7),
+  _bjDay: +m.dateBJ.slice(8,10),
+  _bjHours: +m.dateBJ.slice(11,13),
+  _bjMinutes: +m.dateBJ.slice(14,16),
+  _bjWeekday: (new Date(m.dateBJ).getDay() + 1) % 7
 }));
 
 // ===================== STATE =====================
@@ -923,13 +929,17 @@ let liveCount = 0;
 function pad(n) { return n.toString().padStart(2,'0'); }
 
 function fmtDate(d) {
-  const m = d.getMonth()+1, day = d.getDate();
+  const m = (d._bjMonth !== undefined ? d._bjMonth : d.getMonth()+1);
+  const day = (d._bjDay !== undefined ? d._bjDay : d.getDate());
   const weekdays = ['周日','周一','周二','周三','周四','周五','周六'];
-  return `${m}月${day}日 ${weekdays[d.getDay()]}`;
+  const dayOfWeek = (d._bjWeekday !== undefined ? d._bjWeekday : d.getDay());
+  return `${m}月${day}日 ${weekdays[dayOfWeek]}`;
 }
 
 function fmtTime(d) {
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const h = (d._bjHours !== undefined ? d._bjHours : d.getHours());
+  const mn = (d._bjMinutes !== undefined ? d._bjMinutes : d.getMinutes());
+  return `${pad(h)}:${pad(mn)}`;
 }
 
 // Beijing time labels parsed directly from dateBJ string (no timezone conversion).
@@ -1087,7 +1097,7 @@ function render() {
   // Group upcoming matches by date
   const grouped = {};
   for (let m of upcomingMatches) {
-    const dk = m.date.toISOString().split('T')[0];
+    const dk = m._bjDate; // 北京时间日期分组
     if (!grouped[dk]) grouped[dk] = [];
     grouped[dk].push(m);
   }
@@ -1115,7 +1125,12 @@ function render() {
     for (let dk of Object.keys(finGrouped).sort()) {
       const dayMatches = finGrouped[dk];
       dayMatches.sort((a, b) => a.date - b.date);
-      const dateObj = new Date(dk + 'T00:00:00+08:00');
+      const _bj = dk;
+      const dateObj = new Date(_bj + 'T00:00:00+08:00');
+      dateObj._bjDate = _bj;
+      dateObj._bjMonth = +_bj.slice(5,7);
+      dateObj._bjDay = +_bj.slice(8,10);
+      dateObj._bjWeekday = (new Date(_bj + 'T00:00:00+08:00').getDay() + 1) % 7;
       html += '<div class="date-header">' + fmtDate(dateObj) + ' · ' + dayMatches.length + ' 场比赛（已结束） (北京时间 ' + bjDateLabel(dayMatches[0].dateBJ) + ')</div>';
       html += '<div class="match-grid">';
       for (let m of dayMatches) {
@@ -1140,7 +1155,12 @@ function render() {
     const dayMatches = grouped[dk];
     // 按比赛时间排序，确保同一天内比赛按时间先后展示
     dayMatches.sort((a, b) => a.date - b.date);
-    const dateObj = new Date(dk + 'T00:00:00+08:00');
+    const _bj = dk;
+    const dateObj = new Date(_bj + 'T00:00:00+08:00');
+    dateObj._bjDate = _bj;
+    dateObj._bjMonth = +_bj.slice(5,7);
+    dateObj._bjDay = +_bj.slice(8,10);
+    dateObj._bjWeekday = (new Date(_bj + 'T00:00:00+08:00').getDay() + 1) % 7;
     html += `<div class="date-header">📅 ${fmtDate(dateObj)} · ${dayMatches.length}场比赛 (北京时间 ${bjDateLabel(dayMatches[0].dateBJ)})</div>`;
     html += '<div class="match-grid">';
 

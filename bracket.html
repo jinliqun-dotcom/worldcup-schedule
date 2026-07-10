@@ -413,7 +413,13 @@ const MM = RAW.map(m => ({
   ...m,
   dt: new Date(m.d),
   _g: m.g ? m.g.toUpperCase() : '',
-  _st: m.st || 'group'
+  _st: m.st || 'group',
+  _bjDate: m.d.slice(0,10),
+  _bjMonth: +m.d.slice(5,7),
+  _bjDay: +m.d.slice(8,10),
+  _bjHours: +m.d.slice(11,13),
+  _bjMinutes: +m.d.slice(14,16),
+  _bjWeekday: (new Date(m.d).getDay() + 1) % 7
 }));
 MM.sort((a,b) => a.dt - b.dt);
 
@@ -422,7 +428,13 @@ function fi(c) {
   const x = CC[c]; return x ? '<img src="https://flagcdn.com/16x12/'+x+'.png" alt="" style="vertical-align:middle;margin-right:2px;" onerror="this.style.display=\'none\'">' : '';
 }
 function tx(c) { return (!c||c==='TBD')?'待定':(TN[c]||c); }
-function ds(dt) { return (dt.getMonth()+1)+'/'+dt.getDate()+' '+String(dt.getHours()).padStart(2,'0')+':'+String(dt.getMinutes()).padStart(2,'0'); }
+function ds(m) {
+  const mo = (m._bjMonth !== undefined ? m._bjMonth : m.dt.getMonth()+1);
+  const d = (m._bjDay !== undefined ? m._bjDay : m.dt.getDate());
+  const h = (m._bjHours !== undefined ? m._bjHours : m.dt.getHours());
+  const mn = (m._bjMinutes !== undefined ? m._bjMinutes : m.dt.getMinutes());
+  return mo+'/'+d+' '+String(h).padStart(2,'0')+':'+String(mn).padStart(2,'0');
+}
 function bjLabel(d) {
   if (!d) return '';
   return (+d.slice(5,7)) + '/' + (+d.slice(8,10)) + ' ' + d.slice(11,13) + ':' + d.slice(14,16);
@@ -431,7 +443,7 @@ function bjLabel(d) {
 function bm(m, cls) {
   let c = 'bm'; if (cls) c+=' '+cls; if (m.s==='live') c+=' live'; if (m.s==='done') c+=' done';
   const num = m.id||'';
-  const dstr = ds(m.dt) + ' <span class="bj-note">(北京时间 ' + bjLabel(m.d) + ')</span>';
+  const dstr = ds(m) + ' <span class="bj-note">(北京时间 ' + bjLabel(m.d) + ')</span>';
   let hl, al;
   if (m.s==='done'&&m.sc) {
     const hs=+m.sc.h||0, as=+m.sc.a||0;
