@@ -69,14 +69,14 @@ header {
 
 /* ── R32 merged header (spans col 4–5 via ::before on .lbl-row) ── */
 /* Col widths for reference (must match grid-template-columns below):
-   1:108px  2:108px  3:108px  4:148px  5:148px  6:150px  7:140px  8:130px  9:130px  10:150px  11:130px */
+   1:150px  2:150px  3:150px  4:148px  5:148px  6:150px  7:140px  8:130px  9:130px  10:150px  11:130px */
 
 /* CSS Grid: 11 columns (champions moved to col 11) */
 .bracket-grid {
   display: grid;
   /* Groups   Groups   Groups   R32U   R32L   R16   QF   SF   3RD  Final  Champ */
   grid-template-columns:
-    108px     108px    108px    148px  148px  150px  140px  130px  130px  150px  130px;
+    150px     150px    150px    148px  148px  150px  140px  130px  130px  150px  130px;
   grid-template-rows: 28px 28px auto;
   gap: 0;
   align-items: start;
@@ -225,7 +225,7 @@ header {
 }
 .gc-r { display:flex; gap:2px; align-items:center; font-size:0.68em; padding:0 2px; }
 .gc-i { font-size:0.8em; color:#4a6d99; min-width:12px; flex-shrink:0; }
-.gc-t { flex:1; min-width:0; overflow:visible; white-space:normal; line-height:1.2; }
+.gc-t { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2; }
 .gc-t img { vertical-align:middle; margin-right:2px; }
 .gc-s { font-size:0.8em; color:#5a7a9a; flex-shrink:0; }
 .gc-p { font-size:0.8em; font-weight:700; color:#4da6ff; min-width:18px; text-align:right; flex-shrink:0; }
