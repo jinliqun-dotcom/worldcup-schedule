@@ -889,18 +889,19 @@ const RAW_MATCHES = [
   {id:'QF-4', stage:'QF', home:'ARG', away:'SUI', dateBJ:'2026-07-12T09:00:00+08:00', venue:'Kansas City Stadium, Kansas City', status:'done', score:{home:3,away:1}},
 
   // === SEMI-FINALS (2 matches) — Jul 15-16 ===
-  // SF-1: France vs Spain — Jul 15, 03:00, Dallas
-  // SF-2: England vs Argentina — Jul 16, 03:00, Atlanta
-  {id:'SF-1', stage:'SF', home:'FRA', away:'ESP', dateBJ:'2026-07-15T03:00:00+08:00', venue:'Dallas Stadium, Dallas', status:'upcoming', score:{home:null,away:null}},
-  {id:'SF-2', stage:'SF', home:'ENG', away:'ARG', dateBJ:'2026-07-16T03:00:00+08:00', venue:'Atlanta Stadium, Atlanta', status:'upcoming', score:{home:null,away:null}},
+  // SF-1: France 0-2 Spain — Jul 15, 03:00, Dallas ✅
+  // SF-2: England 1-2 Argentina — Jul 16, 03:00, Atlanta ✅
+  {id:'SF-1', stage:'SF', home:'FRA', away:'ESP', dateBJ:'2026-07-15T03:00:00+08:00', venue:'Dallas Stadium, Dallas', status:'done', score:{home:0,away:2}},
+  {id:'SF-2', stage:'SF', home:'ENG', away:'ARG', dateBJ:'2026-07-16T03:00:00+08:00', venue:'Atlanta Stadium, Atlanta', status:'done', score:{home:1,away:2}},
 
   // === 3RD PLACE (1 match) — Jul 19, 05:00 ===
-  // SF-1 loser vs SF-2 loser
-  {id:'3RD', stage:'3RD', home:'TBD', away:'TBD', dateBJ:'2026-07-19T05:00:00+08:00', venue:'Miami Stadium, Miami', status:'upcoming', score:{home:null,away:null}},
+  // 3RD: France vs England — Jul 19, 05:00, Miami
+  {id:'3RD', stage:'3RD', home:'FRA', away:'ENG', dateBJ:'2026-07-19T05:00:00+08:00', venue:'Miami Stadium, Miami', status:'upcoming', score:{home:null,away:null}},
 
   // === FINAL (1 match) — Jul 20, 03:00 ===
   // SF-1 winner vs SF-2 winner
-  {id:'FINAL', stage:'FINAL', home:'TBD', away:'TBD', dateBJ:'2026-07-20T03:00:00+08:00', venue:'New York New Jersey Stadium, New York/New Jersey', status:'upcoming', score:{home:null,away:null}},
+  // FINAL: Argentina vs Spain — Jul 20, 03:00, New York/New Jersey
+  {id:'FINAL', stage:'FINAL', home:'ARG', away:'ESP', dateBJ:'2026-07-20T03:00:00+08:00', venue:'New York New Jersey Stadium, New York/New Jersey', status:'upcoming', score:{home:null,away:null}},
 ];
 
 // Parse dates
